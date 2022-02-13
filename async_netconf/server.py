@@ -217,7 +217,7 @@ class NetconfServerSession(base.NetconfSession):
 
         self.methods = server.server_methods
         super().__init__(channel, debug, sid)
-        # TODO: Called outside due to async
+        #TODO: Async - Called outside due to async
         #super()._open_session(True)
 
         if self.debug:

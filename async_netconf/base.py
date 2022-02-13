@@ -175,7 +175,7 @@ class NetconfFramingTransport(NetconfPacketTransport):
         else:
             msg += b"]]>]]>"
 
-        #TODO: Use MemoryView for no copy
+        #TODO: Async - Use MemoryView for no copy
         # Apparently ssh has a bug that requires minimum of 64 bytes?
         for chunk in chunkit(msg, self.max_chunk, 64):
             self.stream.stdout.write(chunk)
@@ -274,7 +274,7 @@ class NetconfSession(object):
         self.new_framing = False
         self.capabilities = set()
         self.reader_thread = None
-        #TODO: Replace? self.slock = threading.Lock()
+        #TODO: Async - Replace? self.slock = threading.Lock()
         self.session_id = session_id
         self.session_open = False
         self.keep_running = True
@@ -284,14 +284,14 @@ class NetconfSession(object):
             self.close()
 
     def is_active(self):
-        #TODO: Replace? with self.slock:
+        #TODO: Async - Replace? with self.slock:
             return self.pkt_stream and self.pkt_stream.is_active()
 
     def __str__(self):
         return "NetconfSession(sid:{})".format(self.session_id)
 
     def send_message(self, msg):
-        #TODO: Replace? with self.slock:
+        #TODO: Async - Replace? with self.slock:
         pkt_stream = self.pkt_stream
         if not pkt_stream:
             logger.info("Dropping message b/c no connection stream (%d): %s", len(msg), msg)
@@ -304,7 +304,7 @@ class NetconfSession(object):
         # private method to receive a full message.
         #TODO: Async - Replace? 
         #with self.slock:
-        #TODO: Async
+        #TODO: Async - keep_running
         #if self.reader_thread and not self.reader_thread.keep_running:
         #    return None
         if not self.keep_running:
@@ -333,7 +333,7 @@ class NetconfSession(object):
         if self.debug:
             logger.debug("%s: Closing.", str(self))
 
-        #TODO: Replace? with self.slock:
+        #TODO: Async - Replace? with self.slock:
             if self.session_open:
                 self.session_open = False
                 self.session_id = None
@@ -398,7 +398,7 @@ class NetconfSession(object):
             self.session_open = True
 
             # Create reader thread.
-            #TODO: Called manually from handle_client
+            #TODO: Async - Called manually from handle_client
             #self.reader_thread = threading.Thread(target=self._read_message_thread)
             #self.reader_thread.daemon = True
             #self.reader_thread.keep_running = True
@@ -452,7 +452,7 @@ class NetconfSession(object):
                         logger.debug("Client remote closed, exiting reader thread.")
                     closed = True
 
-                #TODO: Replace? with self.slock:
+                #TODO: Async - Replace? with self.slock:
                 #TODO: Async - if closed:
                 #    reader_thread.keep_running = False
                 if closed:

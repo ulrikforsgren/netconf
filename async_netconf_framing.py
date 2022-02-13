@@ -28,7 +28,7 @@ nsmap_add("ncwr", "urn:ietf:params:netconf:capability:writable-running:1.0")
 
 class SystemServer(object):
     def __init__(self):
-        #TODO: Fix self.server = server.NetconfSSHServer(auth, self, port, host_key, debug)
+        #TODO: Async - Fix self.server = server.NetconfSSHServer(auth, self, port, host_key, debug)
         self.server = SSHServer(self)
 
     def close():
@@ -145,7 +145,7 @@ async def handle_client(process: asyncssh.SSHServerProcess) -> None:
         traceback.print_tb(e.__traceback__)
     process.exit(0)
 
-# TODO: Async - Merge with NetconfSSHServer?
+#TODO: Async - Merge with NetconfSSHServer?
 class MySSHServer(asyncssh.SSHServer):
     def connection_made(self, conn: asyncssh.SSHServerConnection) -> None:
         print('SSH connection received from %s.' %
