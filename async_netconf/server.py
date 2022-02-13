@@ -21,10 +21,7 @@ import io
 import logging
 import os
 import sys
-#TODO: Remove import threading
-#TODO: Remove import paramiko as ssh
 from lxml import etree
-#TODO: Remove import sshutil.server
 
 from async_netconf import base
 import async_netconf.error as ncerror
@@ -275,7 +272,7 @@ class NetconfServerSession(base.NetconfSession):
             reply.append(rpc_reply)
         except AttributeError:
             reply.extend(rpc_reply)
-        ucode = etree.tounicode(reply, pretty_print=True)
+        ucode = etree.tostring(reply, pretty_print=True)
         if self.debug:
             logger.debug("%s: Sending RPC-Reply: %s", str(self), str(ucode))
         self.send_message(ucode)
@@ -301,7 +298,7 @@ class NetconfServerSession(base.NetconfSession):
         # Any error with XML encoding here is going to cause a session close
         # Technically we should be able to return malformed message I think.
         try:
-            tree = etree.parse(io.BytesIO(msg.lstrip().encode('utf-8')))
+            tree = etree.parse(io.BytesIO(msg.lstrip()))
             if not tree:
                 raise ncerror.SessionError(msg, "Invalid XML from client.")
         except etree.XMLSyntaxError:

@@ -175,7 +175,7 @@ async def start_server() -> None:
     for port in range(0, n):
         await asyncssh.create_server(MySSHServer, '', 10000+port,
                                      server_host_keys=['ssh_host_key'],
-                                     #encoding=None, # Enables bytes mode
+                                     encoding=None, # Enables bytes mode
                                      process_factory=handle_client)
 
     elapsed = time.monotonic()-start

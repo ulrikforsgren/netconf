@@ -22,8 +22,8 @@ import logging
 import io
 import socket
 import sys
-#TODO: Remove import threading
 import traceback
+
 from lxml import etree
 
 from async_netconf import NSMAP, MAXSSHBUF
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 NC_BASE_10 = "urn:ietf:params:netconf:base:1.0"
 NC_BASE_11 = "urn:ietf:params:netconf:base:1.1"
-XML_HEADER = """<?xml version="1.0" encoding="UTF-8"?>"""
+XML_HEADER = b"""<?xml version="1.0" encoding="UTF-8"?>"""
 
 if sys.version_info[0] >= 3:
 
@@ -131,9 +131,7 @@ class NetconfFramingTransport(NetconfPacketTransport):
         self.stream = stream
         self.max_chunk = max_chunk
         self.debug = debug
-        #TODO: Default is str mode of asyncssh, switch to bytes mode.
-        #self.rbuffer = b""
-        self.rbuffer = ""
+        self.rbuffer = bytearray()
 
     def __del__(self):
         self.close()
@@ -167,41 +165,38 @@ class NetconfFramingTransport(NetconfPacketTransport):
     def send_pdu(self, msg, new_framing):
         assert self.stream is not None
         if new_framing:
-            #TODO: Async - switch to bytes
             #bmsg = msg.encode('utf-8')
             bmsg = msg
             blen = len(bmsg)
-            #msg = "\n#{}\n".format(blen).encode('utf-8') + bmsg + "\n##\n".encode('utf-8')
-            msg = "\n#{}\n".format(blen) + bmsg + "\n##\n"
+            msg = bytearray()
+            msg += "\n#{}\n".format(blen).encode('utf-8')
+            msg += bmsg
+            msg += b"\n##\n"
         else:
-            msg += "]]>]]>"
+            msg += b"]]>]]>"
 
+        #TODO: Use MemoryView for no copy
         # Apparently ssh has a bug that requires minimum of 64 bytes?
         for chunk in chunkit(msg, self.max_chunk, 64):
-            #self.stream.sendall(chunk)
             self.stream.stdout.write(chunk)
 
     async def _receive_10(self):
         searchfrom = 0
         while True:
-            #eomidx = self.rbuffer.find(b"]]>]]>", searchfrom)
-            eomidx = self.rbuffer.find("]]>]]>", searchfrom)
+            eomidx = self.rbuffer.find(b"]]>]]>", searchfrom)
             if eomidx != -1:
                 break
             searchfrom = max(0, len(self.rbuffer) - 5)
-            #buf = self.stream.recv(self.max_chunk)
             buf = await self.stream.stdin.read(self.max_chunk)
             self.rbuffer += buf
 
         msg = self.rbuffer[:eomidx]
         self.rbuffer = self.rbuffer[eomidx + 6:]
-        #return msg.decode('utf-8')
         return msg
 
     async def _receive_chunk(self):
         blen = len(self.rbuffer)
         while blen < 4:
-            #buf = self.stream.recv(self.max_chunk)
             buf = await self.stream.stdin.read(self.max_chunk)
             self.rbuffer += buf
             blen = len(self.rbuffer)
@@ -214,8 +209,7 @@ class NetconfFramingTransport(NetconfPacketTransport):
                     logger.debug("Channel closed: Zero bytes read")
                 raise ChannelClosed(self)
 
-        #if self.rbuffer[:2] != b"\n#":
-        if self.rbuffer[:2] != "\n#":
+        if self.rbuffer[:2] != b"\n#":
             raise FramingError(self.rbuffer)
         self.rbuffer = self.rbuffer[2:]
 
@@ -223,8 +217,7 @@ class NetconfFramingTransport(NetconfPacketTransport):
         idx = -1
         searchfrom = 0
         while True:
-            #idx = self.rbuffer.find(b"\n", searchfrom)
-            idx = self.rbuffer.find("\n", searchfrom)
+            idx = self.rbuffer.find(b"\n", searchfrom)
             if 12 > idx > 0:
                 break
             if idx > 12 or len(self.rbuffer) > 12:
@@ -233,15 +226,12 @@ class NetconfFramingTransport(NetconfPacketTransport):
             self.rbuffer += self.stream.recv(self.max_chunk)
 
         # Check for last chunk.
-        #if self.rbuffer[0:2] == b"#\n":
-        if self.rbuffer[0:2] == "#\n":
+        if self.rbuffer[0:2] == b"#\n":
             self.rbuffer = self.rbuffer[2:]
             return None
 
         lenstr = self.rbuffer[:idx]
-        #TODO: Async - switch to bytes mode
-        #self.rbuffer = bytes(self.rbuffer[idx + 1:])
-        self.rbuffer = self.rbuffer[idx + 1:]
+        self.rbuffer = bytearray(self.rbuffer[idx + 1:])
 
         try:
             chunklen = int(lenstr)
@@ -267,9 +257,7 @@ class NetconfFramingTransport(NetconfPacketTransport):
 
     async def _receive_11(self):
         assert self.stream is not None
-        #data = b"".join([x for x in self._iter_receive_chunks()])
-        data = "".join([x async for x in self._iter_receive_chunks()])
-        #return data.decode('utf-8')
+        data = b"".join([x async for x in self._iter_receive_chunks()])
         return data
 
 
@@ -339,7 +327,7 @@ class NetconfSession(object):
         if session_id is not None:
             msg.append(ncutil.leaf_elm("session-id", str(session_id)))
         msg = etree.tostring(msg)
-        self.send_message(msg.decode('utf-8'))
+        self.send_message(msg)
 
     def close(self):
         if self.debug:
@@ -380,7 +368,7 @@ class NetconfSession(object):
                 logger.debug("Received HELLO")
 
             # Parse reply
-            tree = etree.parse(io.BytesIO(reply.encode('utf-8')))
+            tree = etree.parse(io.BytesIO(reply))
             root = tree.getroot()
             caps = root.xpath("//nc:hello/nc:capabilities/nc:capability", namespaces=NSMAP)
 
