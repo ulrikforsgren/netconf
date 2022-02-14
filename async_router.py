@@ -16,8 +16,15 @@ import lxml.etree as etree
 
 from async_netconf import nsmap_add, NSMAP, MAXSSHBUF
 
-passwords = {'guest': '',                 # guest account with no password
-             'user123': 'qV2iEadIGV2rw'   # password of 'secretpw'
+"""
+TODO:
+ - Consolidate handle_client into NetconfSSHServer or NetconfSession
+ - Fix locking
+ - Cleanup keep_running
+"""
+
+passwords = {'guest': 'guest',          # guest account with no password
+             'admin': 'admin'   # password of 'secretpw'
             }
 
 nsmap_add("sys", "urn:ietf:params:xml:ns:yang:ietf-system")
@@ -101,12 +108,13 @@ class SystemServer(object):
         router = etree.parse('router.xml')
         data.append(router.getroot())
         return data
+        #TODO: Fix filtering
         return util.filter_results(rpc, data, filter_or_none)
 
     def rpc_edit_config(self, session, rpc, source_elm, filter_or_none):  # pylint: disable=W0613
-        print("rpc", etree.tostring(rpc, pretty_print=True).decode('utf-8'))
-        print("source_elm", etree.tostring(source_elm, pretty_print=True).decode('utf-8'))
-        print("filter", etree.tostring(filter_or_none, pretty_print=True).decode('utf-8'))
+        #print("rpc", etree.tostring(rpc, pretty_print=True).decode('utf-8'))
+        #print("source_elm", etree.tostring(source_elm, pretty_print=True).decode('utf-8'))
+        #print("filter", etree.tostring(filter_or_none, pretty_print=True).decode('utf-8'))
         return etree.Element("ok")
 
     def rpc_system_restart(self, session, rpc, *params):
@@ -131,14 +139,13 @@ ssh_server = SSHServer(system_server)
 
 #TODO: Async - Move handle_client into SSHServer...
 async def handle_client(process: asyncssh.SSHServerProcess) -> None:
-    print("handle_client")
+    print("handle_client", id(process), time.time())
     # channel/stream, server/NetconfSSHServer, unused_extra_args, debug
     session = server.NetconfServerSession(process, ssh_server, None, True)
     await session._open_session(True)
 
     try:
         await session._read_message_thread()
-        print("Connection broken")
     except Exception as e:
         print("Connection broken")
         print(type(e))
@@ -153,10 +160,14 @@ class MySSHServer(asyncssh.SSHServer):
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
         if exc:
-            print('SSH connection error: ' + str(exc), file=sys.stderr)
-            traceback.print_tb(exc.__traceback__)
+            if isinstance(exc, ConnectionResetError):
+                print('SSH connection reset.', id(self), time.time())
+            else:
+                print('SSH connection error: ' + str(exc), file=sys.stderr)
+                print(type(exc))
+                traceback.print_tb(exc.__traceback__)
         else:
-            print('SSH connection closed.')
+            print('SSH connection closed.', id(self), time.time())
 
     def begin_auth(self, username: str) -> bool:
         # If the user's password is the empty string, no auth is required
@@ -167,22 +178,27 @@ class MySSHServer(asyncssh.SSHServer):
 
     def validate_password(self, username: str, password: str) -> bool:
         pw = passwords.get(username, '*')
+        return password == pw
         return crypt.crypt(password, pw) == pw
 
 async def start_server() -> None:
     start = time.monotonic()
-    n = 1
+    n = 10000
     for port in range(0, n):
-        await asyncssh.create_server(MySSHServer, '', 10000+port,
-                                     server_host_keys=['ssh_host_key'],
-                                     encoding=None, # Enables bytes mode
-                                     process_factory=handle_client)
+        try:
+            await asyncssh.create_server(MySSHServer, '', 10000+port,
+                                         server_host_keys=['ssh_host_key'],
+                                         encoding=None, # Enables bytes mode
+                                         process_factory=handle_client)
+        except Exception as e:
+            print(type(e), e)
 
     elapsed = time.monotonic()-start
     print("Servers started!")
     print(f"Listening on {n} ports.")
     print(f"Startup in {elapsed} seconds.")
-    await asyncio.sleep(300)
+    while True:
+        await asyncio.sleep(60)
 
 try:
     asyncio.run(start_server())
