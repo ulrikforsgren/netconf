@@ -6,6 +6,13 @@ A Netconf Client/Server Library
 example of an initial example. The modules with async support are found in
 directory async_netconf.
 
+TODO:
+1. Merge and use NetconfSSHServer
+2. Merge and use SSHUserPassController
+3. Merge and use NetconfServerSession
+4. Create tests for server
+5. Look into client
+
 This package supports creating both netconf clients and servers. It also
 provides a CLI netconf client utility. An example server is included under
 the `example` subdirectory.
