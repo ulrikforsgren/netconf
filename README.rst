@@ -2,6 +2,10 @@
 A Netconf Client/Server Library
 ===============================
 
+*NOTE!* This a working branch to add asyncio support. See async_router.py as an
+example of an initial example. The modules with async support are found in
+directory async_netconf.
+
 This package supports creating both netconf clients and servers. It also
 provides a CLI netconf client utility. An example server is included under
 the `example` subdirectory.
