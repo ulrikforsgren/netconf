@@ -284,7 +284,8 @@ class NetconfServerSession(base.NetconfSession):
         raise ncerror.OperationNotSupportedProtoError(rpc)
 
     def _send_rpc_reply_error(self, error):
-        self.send_message(error.get_reply_msg())
+        #TODO: Need to look over the API bytes vs. str boundary
+        self.send_message(error.get_reply_msg().encode('utf-8'))
 
     def _reader_exits(self):
         if self.debug:
@@ -338,7 +339,7 @@ class NetconfServerSession(base.NetconfSession):
                     # XXX should be RPC-unlocking if need be
                     if self.debug:
                         logger.debug("%s: Received close-session msg-id: %s", str(self), msg_id)
-                    self._send_rpc_reply(etree.Element("ok"), rpc)
+                    sel._send_rpc_reply(etree.Element("ok"), rpc)
                     self.close()
                     # XXX should we also call the user method if it exists?
                     return

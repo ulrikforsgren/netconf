@@ -21,6 +21,7 @@ TODO:
  - Consolidate handle_client into NetconfSSHServer or NetconfSession
  - Fix locking
  - Cleanup keep_running
+ - Use argParse
 """
 
 passwords = {'guest': 'guest',          # guest account with no password
@@ -160,8 +161,16 @@ class MySSHServer(asyncssh.SSHServer):
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
         if exc:
+            # TODO: Handle these exception at the proper place...
             if isinstance(exc, ConnectionResetError):
-                print('SSH connection reset.', id(self), time.time())
+                pass
+                #print('SSH connection reset.')
+            elif isinstance(exc, asyncssh.misc.ConnectionLost):
+                pass
+                #print('SSH connection lost.')
+            elif isinstance(exc, BrokenPipeError):
+                pass
+                #print('Broken Pipe.')
             else:
                 print('SSH connection error: ' + str(exc), file=sys.stderr)
                 print(type(exc))
@@ -181,17 +190,26 @@ class MySSHServer(asyncssh.SSHServer):
         return password == pw
         return crypt.crypt(password, pw) == pw
 
+
+
+async def start_listen(port):
+        #asyncio.create_task(asyncssh.create_server(MySSHServer, '', 30000+port,
+        #                    server_host_keys=['ssh_host_key'],
+        #                    encoding=None, # Enables bytes mode
+        #                    process_factory=handle_client))
+        await asyncssh.listen('', port,
+                            server_factory=MySSHServer,
+                            server_host_keys=['ssh_host_key'],
+                            encoding=None, # Enables bytes mode
+                            process_factory=handle_client)
+
 async def start_server() -> None:
     start = time.monotonic()
-    n = 10000
+    n = int(sys.argv[1])
+
     for port in range(0, n):
-        try:
-            await asyncssh.create_server(MySSHServer, '', 10000+port,
-                                         server_host_keys=['ssh_host_key'],
-                                         encoding=None, # Enables bytes mode
-                                         process_factory=handle_client)
-        except Exception as e:
-            print(type(e), e)
+        await start_listen(30000+port)
+        print(port)
 
     elapsed = time.monotonic()-start
     print("Servers started!")

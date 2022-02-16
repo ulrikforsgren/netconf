@@ -8,6 +8,7 @@ directory async_netconf.
 
 TODO:
 
+- Handle exceptions fron asyncssh
 - Merge and use NetconfSSHServer
 - Merge and use SSHUserPassController
 - Merge and use NetconfServerSession

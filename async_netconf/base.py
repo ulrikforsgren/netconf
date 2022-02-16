@@ -177,8 +177,12 @@ class NetconfFramingTransport(NetconfPacketTransport):
 
         #TODO: Async - Use MemoryView for no copy
         # Apparently ssh has a bug that requires minimum of 64 bytes?
-        for chunk in chunkit(msg, self.max_chunk, 64):
-            self.stream.stdout.write(chunk)
+        try:
+            for chunk in chunkit(msg, self.max_chunk, 64):
+                self.stream.stdout.write(chunk)
+        except BrokenPipeError as e:
+            #TODO: How to handle broken connection properly?
+            pass
 
     async def _receive_10(self):
         searchfrom = 0
