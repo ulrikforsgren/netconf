@@ -24,6 +24,7 @@ import socket
 import sys
 import traceback
 
+import asyncssh
 from lxml import etree
 
 from async_netconf import NSMAP, MAXSSHBUF
@@ -192,6 +193,7 @@ class NetconfFramingTransport(NetconfPacketTransport):
                 break
             searchfrom = max(0, len(self.rbuffer) - 5)
             buf = await self.stream.stdin.read(self.max_chunk)
+            if buf == b'': raise ChannelClosed()
             self.rbuffer += buf
 
         msg = self.rbuffer[:eomidx]
@@ -202,6 +204,7 @@ class NetconfFramingTransport(NetconfPacketTransport):
         blen = len(self.rbuffer)
         while blen < 4:
             buf = await self.stream.stdin.read(self.max_chunk)
+            if buf == b'': raise ChannelClosed()
             self.rbuffer += buf
             blen = len(self.rbuffer)
             if self.stream is None:
@@ -503,7 +506,15 @@ class NetconfSession(object):
             if self.debug:
                 logger.debug("Socket error in reader thread [exiting]: %s", str(error))
             self.close()
+        #
+        # Exceptions from asyncssh, remove 
+        #
+        except asyncssh.misc.ConnectionLost as error:
+            if self.debug:
+                logger.debug("Connection lost in reader thread [exiting]: %s", str(error))
+            self.close()
         except Exception as error:
+            print(type(self), "_read_message_thread -> Exception", error)
             #TODO: Async - stop receive_message_thread
             #with self.slock:
             #    keep_running = reader_thread.keep_running
@@ -519,6 +530,7 @@ class NetconfSession(object):
                              traceback.format_exc())
         finally:
             # If we are exiting the read thread we close the session.
+            print(type(self), "_read_message_thread -> _reader_exits")
             self._reader_exits()
 
 

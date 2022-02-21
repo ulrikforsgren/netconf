@@ -210,7 +210,7 @@ class NetconfServerSession(base.NetconfSession):
 
     def __init__(self, channel, server, unused_extra_args, debug):
         self.server = server
-
+        print("NetconfServerSession.__init__")
         sid = self.server._allocate_session_id()
         if debug:
             logger.debug("NetconfServerSession: Creating session-id %s", str(sid))

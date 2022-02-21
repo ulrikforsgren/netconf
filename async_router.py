@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- mode: python; python-indent: 4 -*-
+
 # To run this program, the file ``ssh_host_key`` must exist with an SSH
 # private key in it to use as a server host key. An SSH host certificate
 # can optionally be provided in the file ``ssh_host_key-cert.pub``.
@@ -35,11 +38,14 @@ nsmap_add("tailf", "http://tail-f.com/yang/common")
 nsmap_add("ncwr", "urn:ietf:params:netconf:capability:writable-running:1.0")
 
 class SystemServer(object):
-    def __init__(self):
+    def __init__(self, port):
         #TODO: Async - Fix self.server = server.NetconfSSHServer(auth, self, port, host_key, debug)
-        self.server = SSHServer(self)
+        self.server = SSHServer(self, port)
 
-    def close():
+    async def listen(self):
+        await self.server.listen()
+
+    def close(self):
         self.server.close()
 
     def nc_append_capabilities(self, capabilities):  # pylint: disable=W0613
@@ -124,59 +130,78 @@ class SystemServer(object):
     def rpc_system_shutdown(self, session, rpc, *params):
         raise error.AccessDeniedAppError(rpc)
 
+
+
+# Merge with NetconfSSHServer
 class SSHServer:
-    def __init__(self, methods):
+    def __init__(self, methods, port):
+        print("SSHServer.__init__")
         self.sid = 0
         self.server_methods = methods
+        self.port = port
     def _allocate_session_id(self):
         self.sid+=1
         return self.sid
     def unlock_target_any(self, session):
         pass
+    async def listen(self):
+        options = asyncssh.SSHServerConnectionOptions(
+                            line_editor=False,
+                            allow_scp=False
+                            )
+        await asyncssh.listen('', self.port, reuse_port=True,
+                            options= options,
+                            server_factory=MySSHServer,
+                            server_host_keys=['ssh_host_key'],
+                            encoding=None, # Enables bytes mode
+                            process_factory=self.handle_client)
+    async def handle_client(self, process: asyncssh.SSHServerProcess) -> None:
+        print(type(self), "handle_client", process.subsystem)
+        # channel/stream, server/NetconfSSHServer, unused_extra_args, debug
+        session = server.NetconfServerSession(process, self, None, True)
+        await session._open_session(True)
 
-system_server = SystemServer()
-ssh_server = SSHServer(system_server)
-
-
-#TODO: Async - Move handle_client into SSHServer...
-async def handle_client(process: asyncssh.SSHServerProcess) -> None:
-    print("handle_client", id(process), time.time())
-    # channel/stream, server/NetconfSSHServer, unused_extra_args, debug
-    session = server.NetconfServerSession(process, ssh_server, None, True)
-    await session._open_session(True)
-
-    try:
-        await session._read_message_thread()
-    except Exception as e:
+        try:
+            await session._read_message_thread()
+        except Exception as e:
+            print(type(e))
+            traceback.print_tb(e.__traceback__)
         print("Connection broken")
-        print(type(e))
-        traceback.print_tb(e.__traceback__)
-    process.exit(0)
+        process.exit(0)
 
-#TODO: Async - Merge with NetconfSSHServer?
+
+
+
+# New instance for each connection
 class MySSHServer(asyncssh.SSHServer):
+    def __init__(self):
+        print(type(self), "__init__")
+        #traceback.print_stack()
+        super().__init__()
+
     def connection_made(self, conn: asyncssh.SSHServerConnection) -> None:
         print('SSH connection received from %s.' %
                   conn.get_extra_info('peername')[0])
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
+        print(type(self), "connection_lost")
         if exc:
             # TODO: Handle these exception at the proper place...
             if isinstance(exc, ConnectionResetError):
                 pass
-                #print('SSH connection reset.')
+                print('SSH connection reset.')
             elif isinstance(exc, asyncssh.misc.ConnectionLost):
                 pass
-                #print('SSH connection lost.')
+                print('SSH connection lost.')
             elif isinstance(exc, BrokenPipeError):
                 pass
-                #print('Broken Pipe.')
+                print('Broken Pipe.')
             else:
                 print('SSH connection error: ' + str(exc), file=sys.stderr)
-                print(type(exc))
+                print("Exception", type(exc))
                 traceback.print_tb(exc.__traceback__)
         else:
-            print('SSH connection closed.', id(self), time.time())
+            print('SSH connection closed.')
 
     def begin_auth(self, username: str) -> bool:
         # If the user's password is the empty string, no auth is required
@@ -190,31 +215,26 @@ class MySSHServer(asyncssh.SSHServer):
         return password == pw
         return crypt.crypt(password, pw) == pw
 
+    def session_requested(self):
+        print("session_requested!!!!!!!!!!!")
+        return False
 
-
-async def start_listen(port):
-        #asyncio.create_task(asyncssh.create_server(MySSHServer, '', 30000+port,
-        #                    server_host_keys=['ssh_host_key'],
-        #                    encoding=None, # Enables bytes mode
-        #                    process_factory=handle_client))
-        await asyncssh.listen('', port,
-                            server_factory=MySSHServer,
-                            server_host_keys=['ssh_host_key'],
-                            encoding=None, # Enables bytes mode
-                            process_factory=handle_client)
 
 async def start_server() -> None:
     start = time.monotonic()
-    n = int(sys.argv[1])
+    n = 1
 
-    for port in range(0, n):
-        await start_listen(30000+port)
-        print(port)
+    #for port in range(0, n):
+    #    await start_listen(30000+port)
+    #    print(port)
+    system_server = SystemServer(30000)
+    await system_server.listen()
 
     elapsed = time.monotonic()-start
     print("Servers started!")
     print(f"Listening on {n} ports.")
     print(f"Startup in {elapsed} seconds.")
+    print("\n\n\n")
     while True:
         await asyncio.sleep(60)
 
