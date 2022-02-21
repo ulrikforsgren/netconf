@@ -21,7 +21,10 @@ import io
 import logging
 import os
 import sys
+import traceback
+from typing import Optional
 from lxml import etree
+import asyncssh
 
 from async_netconf import base
 import async_netconf.error as ncerror
@@ -41,165 +44,6 @@ except ImportError:
     have_pam = False
 
 
-#class SSHAuthorizedKeysController(ssh.ServerInterface):
-#    """An implementation of paramiko `ServerInterface` that utilizes users
-#    authorized keys file for authentication.
-#
-#    :param users: A list of usernames whose authorized keys will allow access.
-#    """
-#    def __init__(self, users=None):
-#        self.event = threading.Event()
-#        self.users = users
-#        self.users_keys = {}
-#        if have_pam:
-#            self.pam = pam.pam()
-#        else:
-#            self.pam = None
-#
-#    def get_user_auth_keys(self, username):
-#        """Parse the users's authorized_keys file if any to look for authorized keys"""
-#        if username in self.users_keys:
-#            return self.users_keys[username]
-#
-#        self.users_keys[username] = []
-#
-#        userdir = os.path.expanduser("~" + username)
-#        if not userdir:
-#            return self.users_keys[username]
-#
-#        keyfile = os.path.join(userdir, ".ssh/authorized_keys")
-#        if not keyfile or not os.path.exists(keyfile):
-#            return self.users_keys[username]
-#
-#        with open(keyfile) as f:
-#            for line in f.readlines():
-#                line = line.strip()
-#                if not line or line.startswith("#"):
-#                    continue
-#                values = [x.strip() for x in line.split()]
-#
-#                exp = None
-#                try:
-#                    int(values[0])  # bits value?
-#                except ValueError:
-#                    # Type 1 or type 2, type 1 is bits in second value
-#                    options_ktype = values[0]
-#                    try:
-#                        int(values[1])  # bits value?
-#                    except ValueError:
-#                        # type 2 with options
-#                        ktype = options_ktype
-#                        data = values[1]
-#                    else:
-#                        # Type 1 no options.
-#                        exp = int(values[1])
-#                        data = values[2]
-#                else:
-#                    # Type 1 no options.
-#                    exp = int(values[1])
-#                    data = values[2]
-#
-#                # XXX For now skip type 1 keys
-#                if exp is not None:
-#                    continue
-#
-#                if data:
-#                    import base64
-#                    if ktype == "ssh-rsa":
-#                        key = ssh.RSAKey(data=base64.decodebytes(data.encode('ascii')))
-#                    elif ktype == "ssh-dss":
-#                        key = ssh.DSSKey(data=base64.decodebytes(data.encode('ascii')))
-#                    else:
-#                        key = None
-#                    if key:
-#                        self.users_keys[username].append(key)
-#        return self.users_keys[username]
-#
-#    def get_allowed_auths(self, username):
-#        # This is only called after the user fails some other authentication type.
-#        if self.users is None:
-#            users = [username]
-#        else:
-#            users = self.users
-#        allowed = []
-#        if username in users:
-#            if self.pam:
-#                allowed.append("password")
-#
-#            if self.get_user_auth_keys(username):
-#                allowed.append("publickey")
-#
-#        allowed = ",".join(allowed)
-#        logger.debug("Allowed methods for user %s: %s", str(username), allowed)
-#        return allowed
-#
-#    def check_auth_none(self, unused_username):
-#        return ssh.AUTH_FAILED
-#
-#    def check_auth_publickey(self, username, key):
-#        if not self.get_user_auth_keys(username):
-#            return ssh.AUTH_FAILED
-#        for ukey in self.users_keys[username]:
-#            if ukey == key:
-#                return ssh.AUTH_SUCCESSFUL
-#        return ssh.AUTH_FAILED
-#
-#    def check_auth_password(self, username, password):
-#        # Don't allow empty user or empty passwords
-#        if not username or not password:
-#            return ssh.AUTH_FAILED
-#        if self.pam and self.pam.authenticate(username, password):
-#            return ssh.AUTH_SUCCESSFUL
-#        return ssh.AUTH_FAILED
-#
-#    def check_channel_request(self, kind, chanid):
-#        if kind == "session":
-#            return ssh.OPEN_SUCCEEDED
-#        return ssh.OPEN_FAILED_ADMINISTRATIVELY_PROHIBITED
-#
-#    def check_channel_subsystem_request(self, channel, name):
-#        self.event.set()
-#        return name == "netconf"
-#
-#
-## Backward compat
-#SSHAuthController = SSHAuthorizedKeysController
-#
-#
-#class SSHUserPassController(ssh.ServerInterface):
-#    """An implementation of paramiko `ServerInterface` that authorizes a single user
-#    and password.
-#
-#    :param username: The username to allow.
-#    :param password: The password to allow.
-#    """
-#    def __init__(self, username=None, password=None):
-#        self.username = username
-#        self.password = password
-#        self.event = threading.Event()
-#
-#    def get_allowed_auths(self, username):
-#        del username  # unused
-#        return "password"
-#
-#    def check_auth_none(self, username):
-#        del username  # unused
-#        return ssh.AUTH_FAILED
-#
-#    def check_auth_password(self, username, password):
-#        if self.username == username and self.password == password:
-#            return ssh.AUTH_SUCCESSFUL
-#        return ssh.AUTH_FAILED
-#
-#    def check_channel_request(self, kind, chanid):
-#        if kind == "session":
-#            return ssh.OPEN_SUCCEEDED
-#        return ssh.OPEN_FAILED_ADMINISTRATIVELY_PROHIBITED
-#
-#    def check_channel_subsystem_request(self, channel, name):
-#        self.event.set()
-#        return name == "netconf"
-
 
 class NetconfServerSession(base.NetconfSession):
     """Netconf Server-side session with a client.
@@ -208,17 +52,15 @@ class NetconfServerSession(base.NetconfSession):
     """
     handled_rpc_methods = set(["close-session", "lock", "kill-session", "unlock"])
 
-    def __init__(self, channel, server, unused_extra_args, debug):
+    def __init__(self, stream, server, unused_extra_args, debug):
         self.server = server
-        print("NetconfServerSession.__init__")
+        #print("NetconfServerSession.__init__")
         sid = self.server._allocate_session_id()
         if debug:
             logger.debug("NetconfServerSession: Creating session-id %s", str(sid))
+        super().__init__(stream, debug, sid)
 
         self.methods = server.server_methods
-        super().__init__(channel, debug, sid)
-        #TODO: Async - Called outside due to async
-        #super()._open_session(True)
 
         if self.debug:
             logger.debug("%s: Client session-id %s created", str(self), str(sid))
@@ -293,8 +135,8 @@ class NetconfServerSession(base.NetconfSession):
         return
 
     def _reader_handle_message(self, msg):
-        if not self.session_open:
-            return
+        #if not self.session_open:
+        #    return
 
         # Any error with XML encoding here is going to cause a session close
         # Technically we should be able to return malformed message I think.
@@ -614,85 +456,162 @@ class NetconfMethods(object):
         raise ncerror.OperationNotSupportedProtoError(rpc)
 
 
-#class NetconfSSHServer(sshutil.server.SSHServer):
-#    """A netconf server.
-#
-#    :param server_ctl: The object used for authenticating connections to the server.
-#    :type server_ctl: `ssh.ServerInterface`
-#    :param server_methods: An object which implements servers the rpc_* methods.
-#    :param port: The port to bind the server to.
-#    :param host_key: The file containing the host key.
-#    :param debug: True to enable debug logging.
-#    """
-#    def __init__(self, server_ctl=None, server_methods=None, port=830, host_key=None, debug=False):
-#        self.server_methods = server_methods if server_methods is not None else NetconfMethods()
-#        self.session_id = 1
+class SSHServerSession(asyncssh.SSHServerSession):
+    def __init__(self, server):
+        #print("SSHServerSession")
+        self.server = server
+    def connection_made(self, chan):
+        self.session = NetconfServerSession(chan, self.server, None, True)
+    def subsystem_requested(self, subsystem):
+        return subsystem == 'netconf'
+    def data_received(self, data, datatype):
+        self.session.data_received(data, datatype)
+    def eof_received(self):
+        print("EOF")
+        self._chan.exit(0)
+        return False
+
+# New instance for each connection
+class MySSHServer(asyncssh.SSHServer):
+    def __init__(self, server, server_ctl, server_methods):
+        self.server = server
+        self.server_ctl = server_ctl
+        self.server_methods = server_methods
+        #print(type(self), "__init__")
+        super().__init__()
+
+    def connection_made(self, conn: asyncssh.SSHServerConnection) -> None:
+        print('SSH connection received from %s.' %
+                  conn.get_extra_info('peername')[0])
+
+    def connection_lost(self, exc: Optional[Exception]) -> None:
+        #print(type(self), "connection_lost")
+        if exc:
+            # TODO: Handle these exception at the proper place...
+            if isinstance(exc, ConnectionResetError):
+                pass
+                print('SSH connection reset.')
+            elif isinstance(exc, asyncssh.misc.ConnectionLost):
+                pass
+                print('SSH connection lost.')
+            elif isinstance(exc, BrokenPipeError):
+                pass
+                print('Broken Pipe.')
+            else:
+                print('SSH connection error: ' + str(exc), file=sys.stderr)
+                print("Exception", type(exc))
+                traceback.print_tb(exc.__traceback__)
+        else:
+            print('SSH connection closed.')
+
+    def begin_auth(self, username: str) -> bool:
+        # If the user's password is the empty string, no auth is required
+        return self.server_ctl.get(username) != ''
+
+    def password_auth_supported(self) -> bool:
+        return True
+
+    def validate_password(self, username: str, password: str) -> bool:
+        pw = self.server_ctl.get(username, '*')
+        return password == pw
+        return crypt.crypt(password, pw) == pw
+
+    def session_requested(self):
+        return SSHServerSession(self.server)
+
+
+class NetconfSSHServer:
+    """A netconf server.
+
+    :param server_ctl: The object used for authenticating connections to the server.
+    :type server_ctl: `ssh.ServerInterface`
+    :param server_methods: An object which implements servers the rpc_* methods.
+    :param port: The port to bind the server to.
+    :param host_key: The file containing the host key.
+    :param debug: True to enable debug logging.
+    """
+    def __init__(self, server_ctl=None, server_methods=None, port=830, host_key=None, debug=False):
+        self.server_ctl = server_ctl
+        self.server_methods = server_methods if server_methods is not None else NetconfMethods()
+        self.port = port
+        self.host_key = host_key
+        self.debug = debug
+        self.session_id = 1
 #        self.session_locks_lock = threading.Lock()
-#        self.session_locks = {
-#            "running": 0,
-#            "candidate": 0,
-#        }
-#        print(server_ctl)
-#        print(server_methods)
-#        super(NetconfSSHServer, self).__init__(server_ctl,
-#                                               server_session_class=NetconfServerSession,
-#                                               port=port,
-#                                               host_key=host_key,
-#                                               debug=debug)
-#
-#    def __del__(self):
-#        logger.error("Deleting %s", str(self))
-#
-#    def _allocate_session_id(self):
-#        with self.lock:
-#            sid = self.session_id
-#            self.session_id += 1
-#            return sid
-#
-#    def __str__(self):
-#        return "NetconfSSHServer(port={})".format(self.port)
-#
-#    def unlock_target_any(self, session):
-#        """Unlock any targets locked by this session.
-#
-#        Returns list of targets that this session had locked."""
-#        locked = []
-#        with self.lock:
-#            with self.session_locks_lock:
-#                sid = session.session_id
-#                for target in self.session_locks:
-#                    if self.session_locks[target] == sid:
-#                        self.session_locks[target] = 0
-#                        locked.append(target)
-#                return locked
-#
-#    def unlock_target(self, session, target):
-#        """Unlock the given target."""
-#        with self.lock:
-#            with self.session_locks_lock:
-#                if self.session_locks[target] == session.session_id:
-#                    self.session_locks[target] = 0
-#                    return True
-#                return False
-#
-#    def lock_target(self, session, target):
-#        """Try to obtain target lock.
-#        Return 0 on success or the session ID of the lock holder.
-#        """
-#        with self.lock:
-#            with self.session_locks_lock:
-#                if self.session_locks[target]:
-#                    return self.session_locks[target]
-#                self.session_locks[target] = session.session_id
-#                return 0
-#
-#    def is_target_locked(self, target):
-#        """Returns the sesions ID who owns the lock or 0 if not locked."""
-#        with self.lock:
-#            with self.session_locks_lock:
-#                if target not in self.session_locks:
-#                    return None
-#                return self.session_locks[target]
+        self.session_locks = {
+            "running": 0,
+            "candidate": 0,
+        }
+
+    def __del__(self):
+        logger.error("Deleting %s", str(self))
+
+    def serv_factory(self):
+        return MySSHServer(self, self.server_ctl, self.server_methods)
+
+    async def listen(self):
+        options = asyncssh.SSHServerConnectionOptions(
+                            line_editor=False,
+                            allow_scp=False,
+                            allow_pty=False
+                            )
+
+        await asyncssh.listen('', self.port, reuse_port=True,
+                            options= options,
+                            server_factory=self.serv_factory,
+                            server_host_keys=self.host_key,
+                            encoding=None) # Enables bytes mode
+
+    def _allocate_session_id(self):
+        #TODO: Async - with self.lock:
+        sid = self.session_id
+        self.session_id += 1
+        return sid
+
+    def __str__(self):
+        return "NetconfSSHServer(port={})".format(self.port)
+
+    def unlock_target_any(self, session):
+        """Unlock any targets locked by this session.
+
+        Returns list of targets that this session had locked."""
+        locked = []
+        #TODO: Async - with self.lock:
+        #    with self.session_locks_lock:
+        sid = session.session_id
+        for target in self.session_locks:
+            if self.session_locks[target] == sid:
+                self.session_locks[target] = 0
+                locked.append(target)
+        return locked
+
+    def unlock_target(self, session, target):
+        """Unlock the given target."""
+        #TODO: Async - with self.lock:
+            #with self.session_locks_lock:
+        if self.session_locks[target] == session.session_id:
+            self.session_locks[target] = 0
+            return True
+        return False
+
+    def lock_target(self, session, target):
+        """Try to obtain target lock.
+        Return 0 on success or the session ID of the lock holder.
+        """
+        with self.lock:
+            with self.session_locks_lock:
+                if self.session_locks[target]:
+                    return self.session_locks[target]
+                self.session_locks[target] = session.session_id
+                return 0
+
+    def is_target_locked(self, target):
+        """Returns the sesions ID who owns the lock or 0 if not locked."""
+        #TODO: Async -with self.lock:
+        #    with self.session_locks_lock:
+        if target not in self.session_locks:
+            return None
+        return self.session_locks[target]
 
 
 __author__ = 'Christian Hopps'

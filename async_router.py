@@ -38,9 +38,8 @@ nsmap_add("tailf", "http://tail-f.com/yang/common")
 nsmap_add("ncwr", "urn:ietf:params:netconf:capability:writable-running:1.0")
 
 class SystemServer(object):
-    def __init__(self, port):
-        #TODO: Async - Fix self.server = server.NetconfSSHServer(auth, self, port, host_key, debug)
-        self.server = SSHServer(self, port)
+    def __init__(self, port, host_key, debug=False):
+        self.server = server.NetconfSSHServer(passwords, self, port, host_key, debug)
 
     async def listen(self):
         await self.server.listen()
@@ -131,95 +130,6 @@ class SystemServer(object):
         raise error.AccessDeniedAppError(rpc)
 
 
-
-# Merge with NetconfSSHServer
-class SSHServer:
-    def __init__(self, methods, port):
-        print("SSHServer.__init__")
-        self.sid = 0
-        self.server_methods = methods
-        self.port = port
-    def _allocate_session_id(self):
-        self.sid+=1
-        return self.sid
-    def unlock_target_any(self, session):
-        pass
-    async def listen(self):
-        options = asyncssh.SSHServerConnectionOptions(
-                            line_editor=False,
-                            allow_scp=False
-                            )
-        await asyncssh.listen('', self.port, reuse_port=True,
-                            options= options,
-                            server_factory=MySSHServer,
-                            server_host_keys=['ssh_host_key'],
-                            encoding=None, # Enables bytes mode
-                            process_factory=self.handle_client)
-    async def handle_client(self, process: asyncssh.SSHServerProcess) -> None:
-        print(type(self), "handle_client", process.subsystem)
-        # channel/stream, server/NetconfSSHServer, unused_extra_args, debug
-        session = server.NetconfServerSession(process, self, None, True)
-        await session._open_session(True)
-
-        try:
-            await session._read_message_thread()
-        except Exception as e:
-            print(type(e))
-            traceback.print_tb(e.__traceback__)
-        print("Connection broken")
-        process.exit(0)
-
-
-
-
-# New instance for each connection
-class MySSHServer(asyncssh.SSHServer):
-    def __init__(self):
-        print(type(self), "__init__")
-        #traceback.print_stack()
-        super().__init__()
-
-    def connection_made(self, conn: asyncssh.SSHServerConnection) -> None:
-        print('SSH connection received from %s.' %
-                  conn.get_extra_info('peername')[0])
-
-    def connection_lost(self, exc: Optional[Exception]) -> None:
-        print(type(self), "connection_lost")
-        if exc:
-            # TODO: Handle these exception at the proper place...
-            if isinstance(exc, ConnectionResetError):
-                pass
-                print('SSH connection reset.')
-            elif isinstance(exc, asyncssh.misc.ConnectionLost):
-                pass
-                print('SSH connection lost.')
-            elif isinstance(exc, BrokenPipeError):
-                pass
-                print('Broken Pipe.')
-            else:
-                print('SSH connection error: ' + str(exc), file=sys.stderr)
-                print("Exception", type(exc))
-                traceback.print_tb(exc.__traceback__)
-        else:
-            print('SSH connection closed.')
-
-    def begin_auth(self, username: str) -> bool:
-        # If the user's password is the empty string, no auth is required
-        return passwords.get(username) != ''
-
-    def password_auth_supported(self) -> bool:
-        return True
-
-    def validate_password(self, username: str, password: str) -> bool:
-        pw = passwords.get(username, '*')
-        return password == pw
-        return crypt.crypt(password, pw) == pw
-
-    def session_requested(self):
-        print("session_requested!!!!!!!!!!!")
-        return False
-
-
 async def start_server() -> None:
     start = time.monotonic()
     n = 1
@@ -227,7 +137,7 @@ async def start_server() -> None:
     #for port in range(0, n):
     #    await start_listen(30000+port)
     #    print(port)
-    system_server = SystemServer(30000)
+    system_server = SystemServer(30000, 'ssh_host_key')
     await system_server.listen()
 
     elapsed = time.monotonic()-start

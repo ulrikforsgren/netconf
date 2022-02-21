@@ -133,6 +133,9 @@ class NetconfFramingTransport(NetconfPacketTransport):
         self.max_chunk = max_chunk
         self.debug = debug
         self.rbuffer = bytearray()
+        self.searchfrom = 0
+        self.chunklen = -1
+        self.chunks = []
 
     def __del__(self):
         self.close()
@@ -156,6 +159,13 @@ class NetconfFramingTransport(NetconfPacketTransport):
         else:
             return self.stream.is_active()
 
+    def add_to_buffer(self, data, new_framing):
+        if new_framing:
+            return self._add_11(data)
+        else:
+            return self._add_10(data)
+
+    #TODO: Async - To be removed.
     async def receive_pdu(self, new_framing):
         assert self.stream is not None
         if new_framing:
@@ -166,25 +176,36 @@ class NetconfFramingTransport(NetconfPacketTransport):
     def send_pdu(self, msg, new_framing):
         assert self.stream is not None
         if new_framing:
-            #bmsg = msg.encode('utf-8')
             bmsg = msg
             blen = len(bmsg)
             msg = bytearray()
-            msg += "\n#{}\n".format(blen).encode('utf-8')
+            msg += f"\n#{blen}\n".encode('utf-8')
             msg += bmsg
             msg += b"\n##\n"
         else:
             msg += b"]]>]]>"
-
         #TODO: Async - Use MemoryView for no copy
         # Apparently ssh has a bug that requires minimum of 64 bytes?
         try:
             for chunk in chunkit(msg, self.max_chunk, 64):
-                self.stream.stdout.write(chunk)
+                self.stream.write(chunk)
         except BrokenPipeError as e:
             #TODO: How to handle broken connection properly?
             pass
 
+    def _add_10(self, data):
+        self.rbuffer += data
+        eomidx = self.rbuffer.find(b"]]>]]>", self.searchfrom)
+        if eomidx != -1:
+            msg = self.rbuffer[:eomidx]
+            self.rbuffer = self.rbuffer[eomidx + 6:]
+            self.searchfrom = 0
+            return msg
+        self.searchfrom = max(0, len(self.rbuffer) - 5)
+        return None
+
+
+    #TODO: Async - To be removed.
     async def _receive_10(self):
         searchfrom = 0
         while True:
@@ -262,6 +283,38 @@ class NetconfFramingTransport(NetconfPacketTransport):
             yield chunk
             chunk = await self._receive_chunk()
 
+    def _add_11(self, data):
+        self.rbuffer += data
+        while True:
+            if self.chunklen == -1:
+                if len(self.rbuffer)>2:
+                    self.searchfrom = self.searchfrom or 2
+                    if self.rbuffer[:2] != b"\n#":
+                        raise FramingError(self.rbuffer)
+                    idx = self.rbuffer.find(b"\n", self.searchfrom)
+                    if idx != -1:
+                        lenstr = self.rbuffer[2:idx]
+                        if lenstr == b'#':
+                            self.rbuffer = self.rbuffer[idx+1:]
+                            chunks = self.chunks
+                            self.chunks = []
+                            self.chunklen = -1
+                            return b''.join(chunks)
+                        self.rbuffer = self.rbuffer[idx + 1:]
+                        try:
+                            self.chunklen = int(lenstr)
+                            if not (4294967295 >= self.chunklen > 0):
+                                raise FramingError("Unacceptable chunk length: {}".format(chunklen))
+                        except ValueError:
+                            raise FramingError("Frame length not integer: {}".format(lenstr))
+            elif self.chunklen and len(self.rbuffer)>=self.chunklen:
+                chunk = self.rbuffer[:self.chunklen]
+                self.rbuffer = self.rbuffer[self.chunklen:]
+                self.chunks.append(chunk)
+                self.chunklen = -1
+            else:
+                return None
+
     async def _receive_11(self):
         assert self.stream is not None
         data = b"".join([x async for x in self._iter_receive_chunks()])
@@ -279,10 +332,13 @@ class NetconfSession(object):
         self.debug = debug
         self.pkt_stream = NetconfFramingTransport(stream, max_chunk, debug)
         self.new_framing = False
+        self.initial_hello = True
         self.capabilities = set()
         self.reader_thread = None
         #TODO: Async - Replace? self.slock = threading.Lock()
         self.session_id = session_id
+
+        #TODO: Async - check usage:
         self.session_open = False
         self.keep_running = True
 
@@ -306,6 +362,17 @@ class NetconfSession(object):
         if self.debug:
             logger.debug("Sending message (%d): %s", len(msg), msg)
         pkt_stream.send_pdu(XML_HEADER + msg, self.new_framing)
+
+    def data_received(self, data, datatype):
+        assert(datatype == None)
+        msg = self.pkt_stream.add_to_buffer(data, self.new_framing)
+        if msg:
+            if self.initial_hello:
+                #TODO: Async - What to do it initial hello fails?
+                #TODO: Async - How to get is_server argument?
+                self._handle_initial_hello(msg, True)
+            else:
+                self._reader_handle_message(msg)
 
     async def _receive_message(self):
         # private method to receive a full message.
@@ -370,7 +437,7 @@ class NetconfSession(object):
             self.send_hello((NC_BASE_10, NC_BASE_11), self.session_id)
 
             # Get reply
-            reply = await self._receive_message()
+            reply = self._receive_message()
             if self.debug:
                 logger.debug("Received HELLO")
 
@@ -402,19 +469,58 @@ class NetconfSession(object):
             except ValueError:
                 raise SessionError("Server supplied non integer session-id: {}".format(session_id))
 
-            self.session_open = True
-
-            # Create reader thread.
-            #TODO: Async - Called manually from handle_client
-            #self.reader_thread = threading.Thread(target=self._read_message_thread)
-            #self.reader_thread.daemon = True
-            #self.reader_thread.keep_running = True
-            #self.reader_thread.start()
+            #self.session_open = True
 
             if self.debug:
                 logger.debug("%s: Opened version %s session.", str(self), "1.1"
                              if self.new_framing else "1.0")
+        except Exception:
+            self.close()
+            raise
 
+    #TODO: Async - Evaluate which data reveice approach to use.
+    def _handle_initial_hello(self, reply, is_server):
+        assert is_server or self.session_id is None
+
+        if self.debug:
+            logger.debug("Received HELLO")
+
+        try:
+            # Send hello message.
+            self.send_hello((NC_BASE_10, NC_BASE_11), self.session_id)
+
+            # Parse reply
+            tree = etree.parse(io.BytesIO(reply))
+            root = tree.getroot()
+            caps = root.xpath("//nc:hello/nc:capabilities/nc:capability", namespaces=NSMAP)
+
+            # Store capabilities
+            for cap in caps:
+                self.capabilities.add(cap.text.strip())
+
+            if NC_BASE_11 in self.capabilities:
+                self.new_framing = True
+            elif NC_BASE_10 not in self.capabilities:
+                who = "Server" if is_server else "Client"
+                raise SessionError("{} doesn't implement 1.0 or 1.1 of netconf".format(who))
+
+            # Get session ID.
+            try:
+                session_id = root.xpath("//nc:hello/nc:session-id", namespaces=NSMAP)[0].text
+                # If we are a server it is a failure to receive a session id.
+                if is_server:
+                    raise SessionError("Client sent a session-id")
+                self.session_id = int(session_id)
+            except (KeyError, IndexError, AttributeError):
+                if not is_server:
+                    raise SessionError("Server didn't supply session-id")
+            except ValueError:
+                raise SessionError("Server supplied non integer session-id: {}".format(session_id))
+
+            if self.debug:
+                logger.debug("%s: Opened version %s session.", str(self), "1.1"
+                             if self.new_framing else "1.0")
+            self.initial_hello = False
         except Exception:
             self.close()
             raise
@@ -432,6 +538,7 @@ class NetconfSession(object):
         # Called from reader thread after receiving a framed message
         raise NotImplementedError("read_handle_message")
 
+    #TODO: Async - To be removed.
     async def _read_message_thread(self):
         # XXX the locking and dealing with the exit of this thread needs improvement
         if self.debug:
@@ -514,7 +621,6 @@ class NetconfSession(object):
                 logger.debug("Connection lost in reader thread [exiting]: %s", str(error))
             self.close()
         except Exception as error:
-            print(type(self), "_read_message_thread -> Exception", error)
             #TODO: Async - stop receive_message_thread
             #with self.slock:
             #    keep_running = reader_thread.keep_running
@@ -530,7 +636,6 @@ class NetconfSession(object):
                              traceback.format_exc())
         finally:
             # If we are exiting the read thread we close the session.
-            print(type(self), "_read_message_thread -> _reader_exits")
             self._reader_exits()
 
 
