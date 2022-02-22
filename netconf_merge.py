@@ -1,0 +1,226 @@
+#!/usr/bin/env python3
+# -*- mode: python; python-indent: 4 -*-
+
+from copy import deepcopy
+import json
+import sys
+from  lxml import etree as ET
+
+"""
+Operations:
+ - merge (default)
+ - add
+ - replace
+ - delete
+"""
+
+# TODO:
+# - Refactor code: Look over structure and simplify if possible.
+# - Add rules to control where to add e.g. before, after, ...
+# - Preserve empty lines and adjust fix indentation...
+# - Fix missing newlines for comments before root element.
+# - Handle xmlns prefix on operation
+
+class MergeError(Exception):
+    pass
+
+def fix_indentation(lnode, rnode):
+    # add indentation (note! any garbage text will be copied as well!)
+    # remove one newline to not add one extra empty line
+    # does not work for all indentations...
+#    list(lnode)[-1:][0].tail += rnode.text.replace('\n', '', 1)
+    pass
+
+def has_subelements(e):
+    return len(e)>0
+
+def no_subelements(e):
+    return len(e)==0
+
+def cleanup_attributes(node):
+    for c in node:
+        if 'operation' in c.attrib:
+            del c.attrib['operation']
+        #TBD
+        if 'key' in c.attrib:
+            del c.attrib['key']
+        if has_subelements(c):
+            cleanup_attributes(c)
+
+def no_ns(tag):
+    if '}' in tag:
+        tag = tag.rsplit('}', 1)[1]
+    return tag
+
+def name_in_keyleafs(k, kl):
+    for ns, l in kl:
+        if k == l: return True
+    return False
+        
+def merge_tree(lnode, rnode, schema):
+    for c in rnode:
+        rtag = no_ns(c.tag)
+        # Schema validation
+        if rtag not in schema.keys():
+            print(f"ERROR: Tag {rtag} not found in schema:")
+            sys.exit(1)
+        operation = 'merge' # default
+        if 'operation' in c.attrib:
+            operation = c.attrib.get('operation')
+            del c.attrib['operation']
+
+        # TODO: Use schema
+        keyname = key = None 
+        if 'key' in c.attrib:
+            keyname = c.attrib.get('key')
+            if keyname:
+                v = c.find(keyname)
+                if v is not None:
+                    key = v.text.strip()
+            del c.attrib['key'], v
+            if no_subelements(c):
+                if operation == 'add':
+                    raise MergeError('Attribute key can not be used with '
+                                     'operation add.')
+                else:
+                    raise MergeError('Attribute key can not be used with '
+                                     'text only elements.')
+        if keyname is not None:
+            t,tc,kl = schema[rtag]
+            if not name_in_keyleafs(keyname, kl):
+                print(f"ERROR: Key leaf {keyname} not in schema.")
+                sys.exit(1)
+            
+
+
+        lcs = lnode.findall(c.tag)
+
+        if operation == 'add':
+            if keyname is not None:
+                raise MergeError('Attribute key can not be used with operation '
+                                 'add')
+            if not lcs:
+                lnode.append(c)
+            else:
+                lc = lcs.pop() # Last element
+                lnode.insert(lnode.index(lc)+1, c)
+
+        elif not lcs: # ========= No elements in ltress ==========
+
+            if operation == 'merge':
+                fix_indentation(lnode, rnode)
+                lnode.append(deepcopy(c))
+            elif operation == 'replace':
+                if no_subelements(c):
+                    raise MergeError('Operation replace can not be used '
+                                     'with text only elements.')
+                fix_indentation(lnode, rnode)
+                lnode.append(deepcopy(c))
+            elif operation == 'merge':
+                fix_indentation(lnode, rnode)
+                lnode.append(deepcopy(c))
+            else: # delete
+                pass
+
+        else:          # ========== one or more elements ==========
+
+            if operation == 'merge':
+                if no_subelements(c):
+                    pos = lnode.index(lcs[0])
+                    for lc in lcs:
+                        lnode.remove(lc)
+                    lnode.insert(pos, deepcopy(c))
+                    del pos
+                else:
+                    if keyname is not None:
+                        found = False
+                        for lc in lcs:
+                            if keyname == '*':
+                                x1merge_tree(lc, deepcopy(c), schema)
+                                found = True
+                            else:
+                                k = lc.find(keyname)
+                                if k is not None and k.text.strip() == key:
+                                    found = True
+                                    x2merge_tree(lc, deepcopy(c), schema)
+                        if not found:
+                            lnode.insert(lnode.index(lc)+1, deepcopy(c))
+                            del found
+                    else:
+                        for lc in lcs:
+                            ltag = no_ns(lc.tag)
+                            # Schema validation
+                            if ltag not in schema.keys():
+                                print(f"ERROR: Tag {ltag} not found in schema:")
+                                sys.exit(1)
+                            cschema = schema[ltag]
+                            merge_tree(lc, deepcopy(c), cschema[1])
+
+            elif operation == 'replace':
+                if no_subelements(c):
+                    raise MergeError('Operation replace can not be used '
+                                     'with text only elements.')
+                else:
+                    if keyname is not None:
+                        found = False
+                        for lc in lcs:
+                            if keyname == '*':
+                                lnode.replace(lc, deepcopy(c))
+                                found = True
+                            else:
+                                k = lc.find(keyname)
+                                if k is not None and k.text.strip() == key:
+                                    found = True
+                                    lnode.replace(lc, deepcopy(c))
+                        if not found:
+                            lnode.insert(lnode.index(lc)+1, deepcopy(c))
+                            del found
+                    else:
+                        for lc in lcs:
+                            x4merge_tree(lc, deepcopy(c), schema)
+
+            elif operation == 'delete':
+                if no_subelements(c):
+                    for lc in lcs:
+                        if c.text is None or c.text.strip() == lc.text.strip():
+                            lnode.remove(lc)
+                else:
+                    if keyname is None:
+                        raise MergeError('No key specified for operation delete.')
+                    for lc in lcs:
+                        if keyname == '*':
+                            lnode.remove(lc)
+                        else:
+                            k = lc.find(keyname)
+                            if k is not None and k.text.strip() == key:
+                                lnode.remove(lc)
+
+def main(files, schema, unit_test=False):
+    ltree = None
+    try:
+        parser = ET.XMLParser(remove_blank_text=True) if unit_test else None
+        for filename in files:
+            doc = ET.parse(filename, parser)
+            if ltree is None:
+                ltree = doc
+            else:
+                # Verify that the root tags are the same
+                assert(ltree.getroot().tag == doc.getroot().tag)
+                # Merge the trees
+                merge_tree(ltree.getroot(), doc.getroot(), schema)
+
+        if ltree is not None:
+            cleanup_attributes(ltree.getroot())
+            return 0, ET.tostring(ltree, pretty_print=unit_test).decode('utf-8')
+    except MergeError as e:
+        return 1, f"ERROR: {e}"
+
+
+if __name__ == "__main__":
+    schema = json.loads(open(sys.argv[1]).read())
+    tree = schema['tree']['tailf-ncs-config:ncs-config'][1] # container sub elems
+    typedefs = schema['typedefs']
+
+    status, xml = main(sys.argv[2:], tree, True)
+    print(xml)
+    sys.exit(status)

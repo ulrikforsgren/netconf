@@ -1,0 +1,4751 @@
+{
+    "modules": {
+        "ietf-inet-types": [
+            "inet",
+            "urn:ietf:params:xml:ns:yang:ietf-inet-types"
+        ],
+        "tailf-common": [
+            "tailf",
+            "http://tail-f.com/yang/common"
+        ],
+        "tailf-ncs-config": [
+            "ncs_cfg",
+            "http://tail-f.com/yang/tailf-ncs-config"
+        ],
+        "tailf-xsd-types": [
+            "xs",
+            "http://tail-f.com/yang/xsd-types"
+        ]
+    },
+    "tree": {
+        "tailf-ncs-config:ncs-config": [
+            "container",
+            {
+                "validate-utf8": [
+                    "container",
+                    {
+                        "enabled": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ]
+                    }
+                ],
+                "ncs-ipc-address": [
+                    "container",
+                    {
+                        "ip": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "ip-address"
+                            ]
+                        ],
+                        "port": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "port-number"
+                            ]
+                        ]
+                    }
+                ],
+                "ncs-ipc-extra-listen-ip": [
+                    "leaf-list",
+                    [
+                        "typedef",
+                        "ip-address"
+                    ]
+                ],
+                "ncs-ipc-access-check": [
+                    "container",
+                    {
+                        "enabled": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "filename": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ]
+                    }
+                ],
+                "enable-shared-memory-schema": [
+                    "leaf",
+                    [
+                        "boolean",
+                        null
+                    ]
+                ],
+                "load-path": [
+                    "container",
+                    {
+                        "dir": [
+                            "leaf-list",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ]
+                    }
+                ],
+                "enable-compressed-schema": [
+                    "leaf",
+                    [
+                        "boolean",
+                        null
+                    ]
+                ],
+                "compressed-schema-level": [
+                    "leaf",
+                    [
+                        "typedef",
+                        "compressed-schema-level-type"
+                    ]
+                ],
+                "state-dir": [
+                    "leaf",
+                    [
+                        "string",
+                        [
+                            [],
+                            []
+                        ]
+                    ]
+                ],
+                "commit-retry-timeout": [
+                    "leaf",
+                    [
+                        "typedef",
+                        "timeout-type"
+                    ]
+                ],
+                "max-validation-errors": [
+                    "leaf",
+                    [
+                        "union",
+                        [
+                            [
+                                "uint32",
+                                []
+                            ],
+                            [
+                                "typedef",
+                                "unbounded-type"
+                            ]
+                        ]
+                    ]
+                ],
+                "notifications": [
+                    "container",
+                    {
+                        "event-streams": [
+                            "container",
+                            {
+                                "stream": [
+                                    "list",
+                                    {
+                                        "name": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "description": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "replay-support": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "builtin-replay-store": [
+                                            "container",
+                                            {
+                                                "enabled": [
+                                                    "leaf",
+                                                    [
+                                                        "boolean",
+                                                        null
+                                                    ]
+                                                ],
+                                                "dir": [
+                                                    "leaf",
+                                                    [
+                                                        "string",
+                                                        [
+                                                            [],
+                                                            []
+                                                        ]
+                                                    ]
+                                                ],
+                                                "max-size": [
+                                                    "leaf",
+                                                    [
+                                                        "typedef",
+                                                        "tailf:size"
+                                                    ]
+                                                ],
+                                                "max-files": [
+                                                    "leaf",
+                                                    [
+                                                        "int64",
+                                                        [
+                                                            [
+                                                                2,
+                                                                "max"
+                                                            ]
+                                                        ]
+                                                    ]
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    [
+                                        [
+                                            "tailf-ncs-config",
+                                            "name"
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "opcache": [
+                    "container",
+                    {
+                        "enabled": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "timeout": [
+                            "leaf",
+                            [
+                                "uint64",
+                                [
+                                    [
+                                        0,
+                                        "max"
+                                    ]
+                                ]
+                            ]
+                        ]
+                    }
+                ],
+                "hide-group": [
+                    "list",
+                    {
+                        "name": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "password": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "tailf:md5-digest-string"
+                            ]
+                        ],
+                        "callback": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ]
+                    },
+                    [
+                        [
+                            "tailf-ncs-config",
+                            "name"
+                        ]
+                    ]
+                ],
+                "cdb": [
+                    "container",
+                    {
+                        "db-dir": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "init-path": [
+                            "container",
+                            {
+                                "dir": [
+                                    "leaf-list",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "client-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "timeout-type"
+                            ]
+                        ],
+                        "subscription-replay": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "replication": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "async",
+                                    "sync"
+                                ]
+                            ]
+                        ],
+                        "journal-compaction": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "automatic",
+                                    "manual"
+                                ]
+                            ]
+                        ],
+                        "operational": [
+                            "container",
+                            {
+                                "db-dir": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "replication-mode": [
+                                    "leaf",
+                                    [
+                                        "enumeration",
+                                        [
+                                            "async",
+                                            "sync"
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "snapshot": [
+                            "container",
+                            {
+                                "pre-populate": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "encrypted-strings": [
+                    "container",
+                    {
+                        "external-keys": [
+                            "container",
+                            {
+                                "command": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "command-timeout": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "timeout-type"
+                                    ]
+                                ],
+                                "command-argument": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "DES3CBC": [
+                            "container",
+                            {
+                                "key1": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "hex8-value-type"
+                                    ]
+                                ],
+                                "key2": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "hex8-value-type"
+                                    ]
+                                ],
+                                "key3": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "hex8-value-type"
+                                    ]
+                                ],
+                                "initVector": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "hex8-value-type"
+                                    ]
+                                ]
+                            }
+                        ],
+                        "AESCFB128": [
+                            "container",
+                            {
+                                "key": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "hex16-value-type"
+                                    ]
+                                ],
+                                "initVector": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "hex16-value-type"
+                                    ]
+                                ]
+                            }
+                        ],
+                        "AES256CFB128": [
+                            "container",
+                            {
+                                "key": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "hex32-value-type"
+                                    ]
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "crypt-hash": [
+                    "container",
+                    {
+                        "algorithm": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "crypt-hash-algorithm-type"
+                            ]
+                        ],
+                        "rounds": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "crypt-hash-rounds-type"
+                            ]
+                        ]
+                    }
+                ],
+                "logs": [
+                    "container",
+                    {
+                        "syslog-config": [
+                            "container",
+                            {
+                                "facility": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "syslog-facility-type"
+                                    ]
+                                ]
+                            }
+                        ],
+                        "trace-id": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "ncs-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "file": [
+                                    "container",
+                                    {
+                                        "name": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "syslog": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "facility": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "syslog-facility-type"
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "external": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "developer-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "file": [
+                                    "container",
+                                    {
+                                        "name": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "syslog": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "facility": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "syslog-facility-type"
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "external": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "developer-log-level": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "error",
+                                    "info",
+                                    "trace"
+                                ]
+                            ]
+                        ],
+                        "audit-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "file": [
+                                    "container",
+                                    {
+                                        "name": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "syslog": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "facility": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "syslog-facility-type"
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "external": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "audit-log-commit": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "audit-log-commit-defaults": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "audit-network-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "file": [
+                                    "container",
+                                    {
+                                        "name": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "syslog": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "facility": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "syslog-facility-type"
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "external": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "netconf-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "file": [
+                                    "container",
+                                    {
+                                        "name": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "syslog": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "facility": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "syslog-facility-type"
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "external": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "log-reply-status": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "jsonrpc-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "file": [
+                                    "container",
+                                    {
+                                        "name": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "syslog": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "facility": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "syslog-facility-type"
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "external": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "snmp-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "file": [
+                                    "container",
+                                    {
+                                        "name": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "syslog": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "facility": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "syslog-facility-type"
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "external": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "snmp-log-level": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "error",
+                                    "info"
+                                ]
+                            ]
+                        ],
+                        "webui-browser-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "filename": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "webui-access-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "traffic-log": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "dir": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "syslog": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "facility": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "syslog-facility-type"
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "netconf-trace-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "filename": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "external": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "format": [
+                                    "leaf",
+                                    [
+                                        "enumeration",
+                                        [
+                                            "pretty",
+                                            "raw"
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "xpath-trace-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "filename": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "external": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "ext-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "filename": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "level": [
+                                    "leaf",
+                                    [
+                                        "uint8",
+                                        [
+                                            [
+                                                0,
+                                                7
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "error-log": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "filename": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "max-size": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "tailf:size"
+                                    ]
+                                ],
+                                "debug": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "level": [
+                                            "leaf",
+                                            [
+                                                "uint16",
+                                                []
+                                            ]
+                                        ],
+                                        "tag": [
+                                            "leaf-list",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "progress-trace": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "dir": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "external": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "command": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "restart": [
+                                    "container",
+                                    {
+                                        "max-attempts": [
+                                            "leaf",
+                                            [
+                                                "uint8",
+                                                []
+                                            ]
+                                        ],
+                                        "delay": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "timeout-type"
+                                            ]
+                                        ],
+                                        "period": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "timeout-type"
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "sort-transactions": [
+                    "leaf",
+                    [
+                        "boolean",
+                        null
+                    ]
+                ],
+                "enable-inactive": [
+                    "leaf",
+                    [
+                        "boolean",
+                        null
+                    ]
+                ],
+                "enable-origin": [
+                    "leaf",
+                    [
+                        "boolean",
+                        null
+                    ]
+                ],
+                "session-limits": [
+                    "container",
+                    {
+                        "max-sessions": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "limit-type"
+                            ]
+                        ],
+                        "session-limit": [
+                            "list",
+                            {
+                                "context": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "max-sessions": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "limit-type"
+                                    ]
+                                ]
+                            },
+                            [
+                                [
+                                    "tailf-ncs-config",
+                                    "context"
+                                ]
+                            ]
+                        ],
+                        "max-config-sessions": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "limit-type"
+                            ]
+                        ],
+                        "config-session-limit": [
+                            "list",
+                            {
+                                "context": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "max-sessions": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "limit-type"
+                                    ]
+                                ]
+                            },
+                            [
+                                [
+                                    "tailf-ncs-config",
+                                    "context"
+                                ]
+                            ]
+                        ]
+                    }
+                ],
+                "parser-limits": [
+                    "container",
+                    {
+                        "max-processing-instruction-length": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "parser-limit-type"
+                            ]
+                        ],
+                        "max-tag-length": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "parser-limit-type"
+                            ]
+                        ],
+                        "max-attribute-length": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "parser-limit-type"
+                            ]
+                        ],
+                        "max-attribute-value-length": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "limit-type"
+                            ]
+                        ],
+                        "max-attribute-count": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "parser-limit-type"
+                            ]
+                        ],
+                        "max-xmlns-prefix-length": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "limit-type"
+                            ]
+                        ],
+                        "max-xmlns-valueLength": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "parser-limit-type"
+                            ]
+                        ],
+                        "max-xmlns-count": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "limit-type"
+                            ]
+                        ],
+                        "max-data-length": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "limit-type"
+                            ]
+                        ]
+                    }
+                ],
+                "aaa": [
+                    "container",
+                    {
+                        "ssh-login-grace-time": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ],
+                        "ssh-max-auth-tries": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "limit-type"
+                            ]
+                        ],
+                        "ssh-server-key-dir": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "ssh-pubkey-authentication": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "none",
+                                    "local",
+                                    "system"
+                                ]
+                            ]
+                        ],
+                        "default-group": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "auth-order": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "validation-order": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "challenge-order": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "expiration-warning": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "ignore",
+                                    "display",
+                                    "prompt"
+                                ]
+                            ]
+                        ],
+                        "audit-user-name": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "known",
+                                    "never"
+                                ]
+                            ]
+                        ],
+                        "max-password-length": [
+                            "leaf",
+                            [
+                                "uint16",
+                                []
+                            ]
+                        ],
+                        "pam": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "service": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "timeout": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "xs:duration"
+                                    ]
+                                ]
+                            }
+                        ],
+                        "restconf": [
+                            "container",
+                            {
+                                "auth-cache-ttl": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "xs:duration"
+                                    ]
+                                ],
+                                "enable-auth-cache-client-ip": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "external-authentication": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "executable": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "use-base64": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "include-extra": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "local-authentication": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "authentication-callback": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "external-validation": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "executable": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "use-base64": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "include-extra": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "validation-callback": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "external-challenge": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "executable": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "use-base64": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "include-extra": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "challenge-callback": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "authorization": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "callback": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "nacm-compliant": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "namespace": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "prefix": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ]
+                    }
+                ],
+                "rollback": [
+                    "container",
+                    {
+                        "enabled": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "directory": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "history-size": [
+                            "leaf",
+                            [
+                                "uint32",
+                                []
+                            ]
+                        ],
+                        "type": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "delta"
+                                ]
+                            ]
+                        ],
+                        "rollback-numbering": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "rolling",
+                                    "fixed"
+                                ]
+                            ]
+                        ]
+                    }
+                ],
+                "ssh": [
+                    "container",
+                    {
+                        "idle-connection-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ],
+                        "algorithms": [
+                            "container",
+                            {
+                                "server-host-key": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "kex": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "dh-group": [
+                                    "container",
+                                    {
+                                        "min-size": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "dh-group-size-type"
+                                            ]
+                                        ],
+                                        "max-size": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "dh-group-size-type"
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "mac": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "encryption": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "client-alive-interval": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "timeout-type"
+                            ]
+                        ],
+                        "client-alive-count-max": [
+                            "leaf",
+                            [
+                                "uint32",
+                                []
+                            ]
+                        ]
+                    }
+                ],
+                "cli": [
+                    "container",
+                    {
+                        "enabled": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "enable-cli-cache": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "allow-implicit-wildcard": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "completion-show-max": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "cli-max"
+                            ]
+                        ],
+                        "style": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "j",
+                                    "c"
+                                ]
+                            ]
+                        ],
+                        "ssh": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "ip": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "ip-address"
+                                    ]
+                                ],
+                                "port": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "port-number"
+                                    ]
+                                ],
+                                "use-keyboard-interactive": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "banner": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "banner-file": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "extra-listen": [
+                                    "list",
+                                    {
+                                        "ip": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "ip-address"
+                                            ]
+                                        ],
+                                        "port": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "port-number"
+                                            ]
+                                        ]
+                                    },
+                                    [
+                                        [
+                                            "tailf-ncs-config",
+                                            "ip"
+                                        ],
+                                        [
+                                            "tailf-ncs-config",
+                                            "port"
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "top-level-cmds-in-sub-mode": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "completion-meta-info": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "completion-meta-info-type"
+                            ]
+                        ],
+                        "allow-abbrev-keys": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "action-call-no-list-instance": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "cli-action-no-list-inst"
+                            ]
+                        ],
+                        "allow-abbrev-enums": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "allow-case-insensitive-enums": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "j-align-leaf-values": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "c-align-leaf-values": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "c-config-align-leaf-values": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "enter-submode-on-leaf": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "table-look-ahead": [
+                            "leaf",
+                            [
+                                "int64",
+                                []
+                            ]
+                        ],
+                        "more-buffer-lines": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "limit-type"
+                            ]
+                        ],
+                        "show-all-ns": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "show-action-completions": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "action-completions-format": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "suppress-fast-show": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "use-expose-ns-prefix": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "show-defaults": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "default-prefix": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "commit-retry-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "timeout-type"
+                            ]
+                        ],
+                        "timezone": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "utc",
+                                    "local"
+                                ]
+                            ]
+                        ],
+                        "with-defaults": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "banner": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "banner-file": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "prompt1": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "prompt2": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "c-prompt1": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "c-prompt2": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "prompt-hostname-delimiter": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "idle-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ],
+                        "prompt-sessions-cli": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "suppress-ned-errors": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "disable-idle-timeout-on-cmd": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "command-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "timeout-type"
+                            ]
+                        ],
+                        "space-completion": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "ignore-leading-whitespace": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "auto-wizard": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ],
+                        "restricted-file-access": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "restricted-file-regexp": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "history-save": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "history-remove-duplicates": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "history-max-size": [
+                            "leaf",
+                            [
+                                "int64",
+                                []
+                            ]
+                        ],
+                        "message-max-size": [
+                            "leaf",
+                            [
+                                "int64",
+                                []
+                            ]
+                        ],
+                        "show-commit-progress": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "commit-message": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "use-double-dot-ranges": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "allow-range-expression-all-types": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "suppress-range-keyword": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "commit-message-format": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "suppress-commit-message-context": [
+                            "leaf-list",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "show-subsystem-messages": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "show-editors": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "rollback-aaa": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "rollback-numbering": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "rolling",
+                                    "fixed"
+                                ]
+                            ]
+                        ],
+                        "show-service-meta-data": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "escape-backslash": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "preserveSemicolon": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "bypass-allow-abbrev-keys": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "mode-info-in-aaa": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "mode-info-in-aaa-type"
+                            ]
+                        ],
+                        "match-completions-search-limit": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "limit-type"
+                            ]
+                        ],
+                        "nmda": [
+                            "container",
+                            {
+                                "show-operational-state": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "restconf": [
+                    "container",
+                    {
+                        "enabled": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "show-hidden": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "root-resource": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "schema-server-url": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "token-response": [
+                            "container",
+                            {
+                                "x-auth-token": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "token-cookie": [
+                                    "container",
+                                    {
+                                        "name": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "directives": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "custom-headers": [
+                            "container",
+                            {
+                                "header": [
+                                    "list",
+                                    {
+                                        "name": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "value": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ]
+                                    },
+                                    [
+                                        [
+                                            "tailf-ncs-config",
+                                            "name"
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "x-frame-options": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "DENY",
+                                    "SAMEORIGIN",
+                                    "ALLOW-FROM"
+                                ]
+                            ]
+                        ],
+                        "x-content-type-options": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "x-xss-protection": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "strict-transport-security": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "content-security-policy": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "transport": [
+                            "container",
+                            {
+                                "tcp": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "ip": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "inet:ip-address"
+                                            ]
+                                        ],
+                                        "port": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "inet:port-number"
+                                            ]
+                                        ],
+                                        "extraIpPorts": [
+                                            "leaf-list",
+                                            [
+                                                "typedef",
+                                                "xs:token"
+                                            ]
+                                        ],
+                                        "dscp": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "dscp-type"
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "ssl": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "ip": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "inet:ip-address"
+                                            ]
+                                        ],
+                                        "port": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "inet:port-number"
+                                            ]
+                                        ],
+                                        "extraIpPorts": [
+                                            "leaf-list",
+                                            [
+                                                "typedef",
+                                                "xs:token"
+                                            ]
+                                        ],
+                                        "dscp": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "dscp-type"
+                                            ]
+                                        ],
+                                        "keyFile": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "certFile": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "caCertFile": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "verify": [
+                                            "leaf",
+                                            [
+                                                "enumeration",
+                                                [
+                                                    "1",
+                                                    "2",
+                                                    "3"
+                                                ]
+                                            ]
+                                        ],
+                                        "depth": [
+                                            "leaf",
+                                            [
+                                                "uint64",
+                                                [
+                                                    [
+                                                        0,
+                                                        "max"
+                                                    ]
+                                                ]
+                                            ]
+                                        ],
+                                        "ciphers": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "protocols": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "ellipticCurves": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "require-module-name": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "webui": [
+                    "container",
+                    {
+                        "enabled": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "server-name": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "match-host-name": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "cache-refresh-secs": [
+                            "leaf",
+                            [
+                                "uint64",
+                                [
+                                    [
+                                        0,
+                                        "max"
+                                    ]
+                                ]
+                            ]
+                        ],
+                        "max-ref-entries": [
+                            "leaf",
+                            [
+                                "uint64",
+                                [
+                                    [
+                                        0,
+                                        "max"
+                                    ]
+                                ]
+                            ]
+                        ],
+                        "docroot": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "webui-index-url": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "webui-one-url": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "login-dir": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "custom-headers": [
+                            "container",
+                            {
+                                "header": [
+                                    "list",
+                                    {
+                                        "name": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "value": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ]
+                                    },
+                                    [
+                                        [
+                                            "tailf-ncs-config",
+                                            "name"
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "x-frame-options": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "DENY",
+                                    "SAMEORIGIN",
+                                    "ALLOW-FROM"
+                                ]
+                            ]
+                        ],
+                        "x-content-type-options": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "x-xss-protection": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "strict-transport-security": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "content-security-policy": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "disable-auth": [
+                            "container",
+                            {
+                                "dir": [
+                                    "leaf-list",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "allow-symlinks": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "transport": [
+                            "container",
+                            {
+                                "tcp": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "redirect": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "ip": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "ip-address"
+                                            ]
+                                        ],
+                                        "port": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "port-number"
+                                            ]
+                                        ],
+                                        "keepalive": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "keepalive-timeout": [
+                                            "leaf",
+                                            [
+                                                "uint64",
+                                                [
+                                                    [
+                                                        1,
+                                                        "max"
+                                                    ]
+                                                ]
+                                            ]
+                                        ],
+                                        "extra-listen": [
+                                            "list",
+                                            {
+                                                "ip": [
+                                                    "leaf",
+                                                    [
+                                                        "typedef",
+                                                        "ip-address"
+                                                    ]
+                                                ],
+                                                "port": [
+                                                    "leaf",
+                                                    [
+                                                        "typedef",
+                                                        "port-number"
+                                                    ]
+                                                ]
+                                            },
+                                            [
+                                                [
+                                                    "tailf-ncs-config",
+                                                    "ip"
+                                                ],
+                                                [
+                                                    "tailf-ncs-config",
+                                                    "port"
+                                                ]
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "ssl": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "redirect": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "ip": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "ip-address"
+                                            ]
+                                        ],
+                                        "port": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "port-number"
+                                            ]
+                                        ],
+                                        "keepalive": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "keepalive-timeout": [
+                                            "leaf",
+                                            [
+                                                "uint64",
+                                                [
+                                                    [
+                                                        1,
+                                                        "max"
+                                                    ]
+                                                ]
+                                            ]
+                                        ],
+                                        "extra-listen": [
+                                            "list",
+                                            {
+                                                "ip": [
+                                                    "leaf",
+                                                    [
+                                                        "typedef",
+                                                        "ip-address"
+                                                    ]
+                                                ],
+                                                "port": [
+                                                    "leaf",
+                                                    [
+                                                        "typedef",
+                                                        "port-number"
+                                                    ]
+                                                ]
+                                            },
+                                            [
+                                                [
+                                                    "tailf-ncs-config",
+                                                    "ip"
+                                                ],
+                                                [
+                                                    "tailf-ncs-config",
+                                                    "port"
+                                                ]
+                                            ]
+                                        ],
+                                        "read-from-db": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "key-file": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "cert-file": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "ca-cert-file": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "verify": [
+                                            "leaf",
+                                            [
+                                                "uint32",
+                                                [
+                                                    [
+                                                        1,
+                                                        3
+                                                    ]
+                                                ]
+                                            ]
+                                        ],
+                                        "depth": [
+                                            "leaf",
+                                            [
+                                                "uint64",
+                                                [
+                                                    [
+                                                        0,
+                                                        "max"
+                                                    ]
+                                                ]
+                                            ]
+                                        ],
+                                        "ciphers": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "protocols": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ],
+                                        "elliptic-curves": [
+                                            "leaf",
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    []
+                                                ]
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "unauthenticated-message-limit": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "unauthenticated-message-limit-type"
+                                    ]
+                                ]
+                            }
+                        ],
+                        "cgi": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "dir": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "request-filter": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "max-request-length": [
+                                    "leaf",
+                                    [
+                                        "uint16",
+                                        []
+                                    ]
+                                ],
+                                "php": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "idle-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ],
+                        "absolute-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ],
+                        "rate-limiting": [
+                            "leaf",
+                            [
+                                "uint64",
+                                [
+                                    [
+                                        0,
+                                        "max"
+                                    ]
+                                ]
+                            ]
+                        ],
+                        "audit": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "use-forwarded-client-ip": [
+                            "container",
+                            {
+                                "proxy-headers": [
+                                    "leaf-list",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "allowed-proxy-ip-prefix": [
+                                    "leaf-list",
+                                    [
+                                        "typedef",
+                                        "inet:ip-prefix"
+                                    ]
+                                ]
+                            }
+                        ],
+                        "resources": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "japi": [
+                    "container",
+                    {
+                        "new-session-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ],
+                        "query-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ],
+                        "connect-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ],
+                        "object-cache-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ],
+                        "event-reply-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ]
+                    }
+                ],
+                "netconf-north-bound": [
+                    "container",
+                    {
+                        "enabled": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "transport": [
+                            "container",
+                            {
+                                "ssh-call-home-source-address": [
+                                    "container",
+                                    {
+                                        "ipv4": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "ipv4-address"
+                                            ]
+                                        ],
+                                        "ipv6": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "ipv6-address"
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "ssh": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "ip": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "ip-address"
+                                            ]
+                                        ],
+                                        "port": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "port-number"
+                                            ]
+                                        ],
+                                        "extra-listen": [
+                                            "list",
+                                            {
+                                                "ip": [
+                                                    "leaf",
+                                                    [
+                                                        "typedef",
+                                                        "ip-address"
+                                                    ]
+                                                ],
+                                                "port": [
+                                                    "leaf",
+                                                    [
+                                                        "typedef",
+                                                        "port-number"
+                                                    ]
+                                                ]
+                                            },
+                                            [
+                                                [
+                                                    "tailf-ncs-config",
+                                                    "ip"
+                                                ],
+                                                [
+                                                    "tailf-ncs-config",
+                                                    "port"
+                                                ]
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "tcp": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "ip": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "ip-address"
+                                            ]
+                                        ],
+                                        "port": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "port-number"
+                                            ]
+                                        ],
+                                        "keepalive": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "extra-listen": [
+                                            "list",
+                                            {
+                                                "ip": [
+                                                    "leaf",
+                                                    [
+                                                        "typedef",
+                                                        "ip-address"
+                                                    ]
+                                                ],
+                                                "port": [
+                                                    "leaf",
+                                                    [
+                                                        "typedef",
+                                                        "port-number"
+                                                    ]
+                                                ]
+                                            },
+                                            [
+                                                [
+                                                    "tailf-ncs-config",
+                                                    "ip"
+                                                ],
+                                                [
+                                                    "tailf-ncs-config",
+                                                    "port"
+                                                ]
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "extended-sessions": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "idle-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ],
+                        "write-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ],
+                        "rpc-errors": [
+                            "leaf",
+                            [
+                                "enumeration",
+                                [
+                                    "close",
+                                    "inline"
+                                ]
+                            ]
+                        ],
+                        "max-batch-processes": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "limit-type"
+                            ]
+                        ],
+                        "capabilities": [
+                            "container",
+                            {
+                                "url": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ],
+                                        "file": [
+                                            "container",
+                                            {
+                                                "enabled": [
+                                                    "leaf",
+                                                    [
+                                                        "boolean",
+                                                        null
+                                                    ]
+                                                ],
+                                                "root-dir": [
+                                                    "leaf",
+                                                    [
+                                                        "string",
+                                                        [
+                                                            [],
+                                                            []
+                                                        ]
+                                                    ]
+                                                ]
+                                            }
+                                        ],
+                                        "ftp": [
+                                            "container",
+                                            {
+                                                "enabled": [
+                                                    "leaf",
+                                                    [
+                                                        "boolean",
+                                                        null
+                                                    ]
+                                                ],
+                                                "source-address": [
+                                                    "container",
+                                                    {
+                                                        "ipv4": [
+                                                            "leaf",
+                                                            [
+                                                                "typedef",
+                                                                "ipv4-address"
+                                                            ]
+                                                        ],
+                                                        "ipv6": [
+                                                            "leaf",
+                                                            [
+                                                                "typedef",
+                                                                "ipv6-address"
+                                                            ]
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ],
+                                        "sftp": [
+                                            "container",
+                                            {
+                                                "enabled": [
+                                                    "leaf",
+                                                    [
+                                                        "boolean",
+                                                        null
+                                                    ]
+                                                ],
+                                                "source-address": [
+                                                    "container",
+                                                    {
+                                                        "ipv4": [
+                                                            "leaf",
+                                                            [
+                                                                "typedef",
+                                                                "ipv4-address"
+                                                            ]
+                                                        ],
+                                                        "ipv6": [
+                                                            "leaf",
+                                                            [
+                                                                "typedef",
+                                                                "ipv6-address"
+                                                            ]
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "inactive": [
+                                    "container",
+                                    {
+                                        "enabled": [
+                                            "leaf",
+                                            [
+                                                "boolean",
+                                                null
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "netconf-call-home": [
+                    "container",
+                    {
+                        "enabled": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "transport": [
+                            "container",
+                            {
+                                "tcp": [
+                                    "container",
+                                    {
+                                        "ip": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "ip-address"
+                                            ]
+                                        ],
+                                        "port": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "port-number"
+                                            ]
+                                        ],
+                                        "extra-listen": [
+                                            "list",
+                                            {
+                                                "ip": [
+                                                    "leaf",
+                                                    [
+                                                        "typedef",
+                                                        "ip-address"
+                                                    ]
+                                                ],
+                                                "port": [
+                                                    "leaf",
+                                                    [
+                                                        "typedef",
+                                                        "port-number"
+                                                    ]
+                                                ]
+                                            },
+                                            [
+                                                [
+                                                    "tailf-ncs-config",
+                                                    "ip"
+                                                ],
+                                                [
+                                                    "tailf-ncs-config",
+                                                    "port"
+                                                ]
+                                            ]
+                                        ],
+                                        "dscp": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "dscp-type"
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "ssh": [
+                                    "container",
+                                    {
+                                        "idle-connection-timeout": [
+                                            "leaf",
+                                            [
+                                                "typedef",
+                                                "xs:duration"
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "southbound-source-address": [
+                    "container",
+                    {
+                        "ipv4": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "ipv4-address"
+                            ]
+                        ],
+                        "ipv6": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "ipv6-address"
+                            ]
+                        ]
+                    }
+                ],
+                "ha": [
+                    "container",
+                    {
+                        "enabled": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "ip": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "ip-address"
+                            ]
+                        ],
+                        "port": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "port-number"
+                            ]
+                        ],
+                        "extra-listen": [
+                            "list",
+                            {
+                                "ip": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "ip-address"
+                                    ]
+                                ],
+                                "port": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "port-number"
+                                    ]
+                                ]
+                            },
+                            [
+                                [
+                                    "tailf-ncs-config",
+                                    "ip"
+                                ],
+                                [
+                                    "tailf-ncs-config",
+                                    "port"
+                                ]
+                            ]
+                        ],
+                        "tick-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ]
+                    }
+                ],
+                "scripts": [
+                    "container",
+                    {
+                        "dir": [
+                            "leaf-list",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ]
+                    }
+                ],
+                "java-vm": [
+                    "container",
+                    {
+                        "auto-start": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "auto-restart": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "start-command": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "run-in-terminal": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "terminal-command": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "stdout-capture": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "file": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "restart-on-error": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "count": [
+                                    "leaf",
+                                    [
+                                        "uint16",
+                                        []
+                                    ]
+                                ],
+                                "duration": [
+                                    "leaf",
+                                    [
+                                        "typedef",
+                                        "xs:duration"
+                                    ]
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "python-vm": [
+                    "container",
+                    {
+                        "auto-start": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "auto-restart": [
+                            "leaf",
+                            [
+                                "boolean",
+                                null
+                            ]
+                        ],
+                        "start-command": [
+                            "leaf",
+                            [
+                                "string",
+                                [
+                                    [],
+                                    []
+                                ]
+                            ]
+                        ],
+                        "run-in-terminal": [
+                            "container",
+                            {
+                                "enabled": [
+                                    "leaf",
+                                    [
+                                        "boolean",
+                                        null
+                                    ]
+                                ],
+                                "terminal-command": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "logging": [
+                            "container",
+                            {
+                                "log-file-prefix": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ]
+                            }
+                        ],
+                        "start-timeout": [
+                            "leaf",
+                            [
+                                "typedef",
+                                "xs:duration"
+                            ]
+                        ]
+                    }
+                ],
+                "smart-license": [
+                    "container",
+                    {
+                        "smart-agent": [
+                            "container",
+                            {
+                                "java-executable": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "java-options": [
+                                    "leaf",
+                                    [
+                                        "string",
+                                        [
+                                            [],
+                                            []
+                                        ]
+                                    ]
+                                ],
+                                "production-url": [
+                                    "leaf",
+                                    [
+                                        "union",
+                                        [
+                                            [
+                                                "typedef",
+                                                "uri"
+                                            ],
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    [
+                                                        "DEFAULT"
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ],
+                                "alpha-url": [
+                                    "leaf",
+                                    [
+                                        "union",
+                                        [
+                                            [
+                                                "typedef",
+                                                "uri"
+                                            ],
+                                            [
+                                                "string",
+                                                [
+                                                    [],
+                                                    [
+                                                        "DEFAULT"
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ],
+                                "override-url": [
+                                    "container",
+                                    {
+                                        "url": [
+                                            "leaf",
+                                            [
+                                                "union",
+                                                [
+                                                    [
+                                                        "typedef",
+                                                        "uri"
+                                                    ],
+                                                    [
+                                                        "string",
+                                                        [
+                                                            [],
+                                                            [
+                                                                "DEFAULT"
+                                                            ]
+                                                        ]
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    }
+                                ],
+                                "proxy": [
+                                    "container",
+                                    {
+                                        "url": [
+                                            "leaf",
+                                            [
+                                                "union",
+                                                [
+                                                    [
+                                                        "typedef",
+                                                        "uri"
+                                                    ],
+                                                    [
+                                                        "string",
+                                                        [
+                                                            [],
+                                                            [
+                                                                "DEFAULT"
+                                                            ]
+                                                        ]
+                                                    ]
+                                                ]
+                                            ]
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "disable-schema-uri-for-agents": [
+                    "leaf-list",
+                    [
+                        "typedef",
+                        "disabled-schema-uri-agents"
+                    ]
+                ]
+            }
+        ]
+    },
+    "typedefs": {
+        "ipv4-address": [
+            "string",
+            [
+                [],
+                [
+                    "((0|(1[0-9]{0,2})|(2(([0-4][0-9]?)|(5[0-5]?)|([6-9]?)))|([3-9][0-9]?))\\.){3}(0|(1[0-9]{0,2})|(2(([0-4][0-9]?)|(5[0-5]?)|([6-9]?)))|([3-9][0-9]?))"
+                ]
+            ]
+        ],
+        "ipv6-address": [
+            "string",
+            [
+                [],
+                [
+                    "((:|[0-9a-fA-F]{0,4}):)([0-9a-fA-F]{0,4}:){0,5}((([0-9a-fA-F]{0,4}:)?(:|[0-9a-fA-F]{0,4}))|(((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])))",
+                    "(([^:]+:){6}(([^:]+:[^:]+)|(.*\\..*)))|((([^:]+:)*[^:]+)?::(([^:]+:)*[^:]+)?)(%.+)?"
+                ]
+            ]
+        ],
+        "ip-address": [
+            "union",
+            [
+                [
+                    "typedef",
+                    "ipv4-address"
+                ],
+                [
+                    "typedef",
+                    "ipv6-address"
+                ]
+            ]
+        ],
+        "port-number": [
+            "uint16",
+            []
+        ],
+        "compressed-schema-level-type": [
+            "uint8",
+            [
+                [
+                    1,
+                    2
+                ]
+            ]
+        ],
+        "xs:duration": [
+            "string",
+            [
+                [],
+                []
+            ]
+        ],
+        "infinity-type": [
+            "enumeration",
+            [
+                "infinity"
+            ]
+        ],
+        "timeout-type": [
+            "union",
+            [
+                [
+                    "typedef",
+                    "xs:duration"
+                ],
+                [
+                    "typedef",
+                    "infinity-type"
+                ]
+            ]
+        ],
+        "unbounded-type": [
+            "enumeration",
+            [
+                "unbounded"
+            ]
+        ],
+        "tailf:size": [
+            "string",
+            [
+                [],
+                [
+                    "S(\\d+G)?(\\d+M)?(\\d+K)?(\\d+B)?"
+                ]
+            ]
+        ],
+        "tailf:md5-digest-string": [
+            "string",
+            [
+                [],
+                []
+            ]
+        ],
+        "xs:hexBinary": [
+            "string",
+            [
+                [],
+                []
+            ]
+        ],
+        "hex8-value-type": [
+            "typedef",
+            "xs:hexBinary"
+        ],
+        "hex16-value-type": [
+            "typedef",
+            "xs:hexBinary"
+        ],
+        "hex32-value-type": [
+            "typedef",
+            "xs:hexBinary"
+        ],
+        "crypt-hash-algorithm-type": [
+            "enumeration",
+            [
+                "md5",
+                "sha-256",
+                "sha-512"
+            ]
+        ],
+        "crypt-hash-rounds-type": [
+            "uint32",
+            [
+                [
+                    1000,
+                    999999999
+                ]
+            ]
+        ],
+        "bsd-facility-type": [
+            "enumeration",
+            [
+                "daemon",
+                "authpriv",
+                "local0",
+                "local1",
+                "local2",
+                "local3",
+                "local4",
+                "local5",
+                "local6",
+                "local7"
+            ]
+        ],
+        "syslog-facility-type": [
+            "union",
+            [
+                [
+                    "typedef",
+                    "bsd-facility-type"
+                ],
+                [
+                    "uint32",
+                    [
+                        [
+                            "min",
+                            2147483647
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        "limit-type": [
+            "union",
+            [
+                [
+                    "uint32",
+                    []
+                ],
+                [
+                    "typedef",
+                    "unbounded-type"
+                ]
+            ]
+        ],
+        "parser-limit-type": [
+            "union",
+            [
+                [
+                    "typedef",
+                    "limit-type"
+                ],
+                [
+                    "enumeration",
+                    [
+                        "model"
+                    ]
+                ]
+            ]
+        ],
+        "dh-group-size-type": [
+            "uint32",
+            [
+                [
+                    1024,
+                    8192
+                ]
+            ]
+        ],
+        "cli-max": [
+            "uint32",
+            [
+                [
+                    5,
+                    2147483647
+                ]
+            ]
+        ],
+        "completion-meta-info-type": [
+            "enumeration",
+            [
+                "false",
+                "alt1",
+                "alt2"
+            ]
+        ],
+        "cli-action-no-list-inst": [
+            "enumeration",
+            [
+                "deny-call",
+                "create-instance"
+            ]
+        ],
+        "mode-info-in-aaa-type": [
+            "enumeration",
+            [
+                "true",
+                "false",
+                "path"
+            ]
+        ],
+        "inet:ipv4-address": [
+            "string",
+            [
+                [],
+                [
+                    "(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])"
+                ]
+            ]
+        ],
+        "inet:ipv6-address": [
+            "string",
+            [
+                [],
+                [
+                    "((:|[0-9a-fA-F]{0,4}):)([0-9a-fA-F]{0,4}:){0,5}((([0-9a-fA-F]{0,4}:)?(:|[0-9a-fA-F]{0,4}))|(((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])))",
+                    "(([^:]+:){6}(([^:]+:[^:]+)|(.*\\..*)))|((([^:]+:)*[^:]+)?::(([^:]+:)*[^:]+)?)(%.+)?"
+                ]
+            ]
+        ],
+        "inet:ip-address": [
+            "union",
+            [
+                [
+                    "typedef",
+                    "inet:ipv4-address"
+                ],
+                [
+                    "typedef",
+                    "inet:ipv6-address"
+                ]
+            ]
+        ],
+        "inet:port-number": [
+            "uint16",
+            [
+                [
+                    0,
+                    65535
+                ]
+            ]
+        ],
+        "xs:token": [
+            "string",
+            [
+                [],
+                []
+            ]
+        ],
+        "dscp-type": [
+            "uint8",
+            [
+                [
+                    0,
+                    63
+                ]
+            ]
+        ],
+        "unauthenticated-message-limit-type": [
+            "union",
+            [
+                [
+                    "uint32",
+                    []
+                ],
+                [
+                    "enumeration",
+                    [
+                        "nolimit"
+                    ]
+                ]
+            ]
+        ],
+        "inet:ipv4-prefix": [
+            "string",
+            [
+                [],
+                [
+                    "(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])/(([0-9])|([1-2][0-9])|(3[0-2]))"
+                ]
+            ]
+        ],
+        "inet:ipv6-prefix": [
+            "string",
+            [
+                [],
+                [
+                    "((:|[0-9a-fA-F]{0,4}):)([0-9a-fA-F]{0,4}:){0,5}((([0-9a-fA-F]{0,4}:)?(:|[0-9a-fA-F]{0,4}))|(((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])))(/(([0-9])|([0-9]{2})|(1[0-1][0-9])|(12[0-8])))",
+                    "(([^:]+:){6}(([^:]+:[^:]+)|(.*\\..*)))|((([^:]+:)*[^:]+)?::(([^:]+:)*[^:]+)?)(/.+)"
+                ]
+            ]
+        ],
+        "inet:ip-prefix": [
+            "union",
+            [
+                [
+                    "typedef",
+                    "inet:ipv4-prefix"
+                ],
+                [
+                    "typedef",
+                    "inet:ipv6-prefix"
+                ]
+            ]
+        ],
+        "uri": [
+            "string",
+            [
+                [],
+                []
+            ]
+        ],
+        "disabled-schema-uri-agents": [
+            "enumeration",
+            [
+                "netconf",
+                "rest"
+            ]
+        ]
+    },
+    "annotations": {}
+}

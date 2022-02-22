@@ -1,0 +1,20 @@
+
+<ncs-config xmlns="http://tail-f.com/yang/tailf-ncs-config">
+
+  <notifications>
+    <event-streams>
+      <stream key="name">
+        <name>another-stream</name>
+        <description>NCS alarms according to tailf-ncs-alarms.yang</description>
+        <replay-support>false</replay-support>
+        <builtin-replay-store>
+          <enabled>false</enabled>
+          <dir>./state</dir>
+          <max-size>S10M</max-size>
+          <max-files>50</max-files>
+        </builtin-replay-store>
+      </stream>
+    </event-streams>
+  </notifications>
+
+</ncs-config>
