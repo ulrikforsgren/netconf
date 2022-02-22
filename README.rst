@@ -23,9 +23,10 @@ TODO asyncio support:
   callback, which doesn't need a reader "thread". Check wich approach i better.
 - Implement more authentication options, "compatible" with the paramiko
   implementation.
-- netconf_merge is still an alpha version:
+- netconf_merge is still an alpha version.
   Create tests for netconf_merge.py to get functional coverage.
-- Add pyang plugin to compile json-schema.
+  Add support for multiple namespaces.
+- Add pyang plugin to compile json-schema from YANG module(s).
 
 This package supports creating both netconf clients and servers. It also
 provides a CLI netconf client utility. An example server is included under

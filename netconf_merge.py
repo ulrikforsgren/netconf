@@ -123,7 +123,7 @@ def merge_tree(lnode, rnode, schema):
             if not name_in_keyleafs(keyname, kl):
                 print(f"ERROR: Key leaf {keyname} not in schema.")
                 sys.exit(1)
-            
+
 
 
         lcs = lnode.findall(c.tag)
@@ -214,10 +214,17 @@ def merge_tree(lnode, rnode, schema):
                                 lnode.replace(lc, deepcopy(c))
                         if not found:
                             lnode.insert(lnode.index(lc)+1, deepcopy(c))
-                            del found
+                        del found
                     else:
-                        for lc in lcs:
-                            x4merge_tree(lc, deepcopy(c), schema)
+                        # Can this be a list with no key?
+                        # Currently assuming only containers...
+                        if len(lcs) == 1:
+                            lnode.replace(lcs[0], deepcopy(c))
+                        else:
+                            raise MergeError('Replacement of multiple non-list'
+                                             ' elements not possible.')
+
+
 
             elif operation in ['delete', 'remove']:
                 if no_subelements(c):
@@ -238,7 +245,7 @@ def merge_tree(lnode, rnode, schema):
                                              f'with {keyname}={key} '
                                              f'does not exists.')
                     del deleted
-    
+
 
 def main(files, schema, unit_test=False):
     ltree = None
