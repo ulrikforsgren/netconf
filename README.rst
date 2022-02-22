@@ -9,6 +9,7 @@ examples in async_example. This to easily see what is changed fro the paramiko
 based implementation.
 
 Current features:
+
 - SSH via asyncssh.
 - Server support.
 - Writable datastore (netconf_merge module + json schema).
@@ -22,7 +23,9 @@ TODO asyncio support:
   callback, which doesn't need a reader "thread". Check wich approach i better.
 - Implement more authentication options, "compatible" with the paramiko
   implementation.
-- Create tests for netconf_merge.py
+- netconf_merge is still an alpha version:
+  Create tests for netconf_merge.py to get functional coverage.
+- Add pyang plugin to compile json-schema.
 
 This package supports creating both netconf clients and servers. It also
 provides a CLI netconf client utility. An example server is included under
