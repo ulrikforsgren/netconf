@@ -130,26 +130,37 @@ class SystemServer(object):
         raise error.AccessDeniedAppError(rpc)
 
 
-async def start_server() -> None:
+async def start_servers(n, start_port) -> None:
+    servers = []
     start = time.monotonic()
-    n = 1
 
-    #for port in range(0, n):
-    #    await start_listen(30000+port)
-    #    print(port)
-    system_server = SystemServer(30000, 'ssh_host_key')
-    await system_server.listen()
+    for port in range(0, n):
+        server = SystemServer(start_port+port, 'ssh_host_key')
+        servers.append(server)
+        await server.listen()
 
     elapsed = time.monotonic()-start
     print("Servers started!")
-    print(f"Listening on {n} ports.")
+    print(f"Listening on {n} ports: {start_port}-{start_port+n-1}")
     print(f"Startup in {elapsed} seconds.")
     print("\n\n\n")
-    while True:
-        await asyncio.sleep(60)
+    try:
+        while True:
+            await asyncio.sleep(60)
+    except KeyboardInterrupt:
+        print("Closing!")
+        for server in servers:
+            server.close()
 
-try:
-    asyncio.run(start_server())
-except (OSError, asyncssh.Error) as exc:
-    print(exc)
-    sys.exit('Error starting server: ' + str(exc))
+def main_servers(n, start_port):
+    try:
+        asyncio.run(start_servers(n, start_port))
+    except (OSError, asyncssh.Error) as exc:
+        print(exc)
+        sys.exit('Error starting server: ' + str(exc))
+
+def main():
+    main_servers(1, 30000)
+
+if __name__ == '__main__':
+    main()
