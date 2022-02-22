@@ -2,18 +2,27 @@
 A Netconf Client/Server Library
 ===============================
 
-*NOTE!* This a working branch to add asyncio support. See async_router.py as an
-example of an initial example. The modules with async support are found in
-directory async_netconf.
+*NOTE!* This a fork of netconf to try to add asyncio support.
 
-TODO:
+The modules with asyncio support are found in directory async_netconf and the
+examples in async_example. This to easily see what is changed fro the paramiko
+based implementation.
 
-- Handle exceptions fron asyncssh
-- Merge and use NetconfSSHServer
-- Merge and use SSHUserPassController
-- Merge and use NetconfServerSession
+Current features:
+- SSH via asyncssh.
+- Server support.
+- Writable datastore (netconf_merge module + json schema).
+- Massive parallelism: Start of 10000 devices in less than a minute. Memory
+  usage depends wheather config is stored or not.
+
+TODO asyncio support:
+
 - Create tests for server
-- Look into client
+- Look into client, the current implementation for server uses the data_received
+  callback, which doesn't need a reader "thread". Check wich approach i better.
+- Implement more authentication options, "compatible" with the paramiko
+  implementation.
+- Create tests for netconf_merge.py
 
 This package supports creating both netconf clients and servers. It also
 provides a CLI netconf client utility. An example server is included under

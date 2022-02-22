@@ -1,33 +1,32 @@
 #!/usr/bin/env python3
 # -*- mode: python; python-indent: 4 -*-
 
-# To run this program, the file ``ssh_host_key`` must exist with an SSH
-# private key in it to use as a server host key. An SSH host certificate
-# can optionally be provided in the file ``ssh_host_key-cert.pub``.
+# This is an async example showing a writable runnable without persistence.
+# The json-schema is found in router.json and the initial configuation is
+# read from router.xml.
+# The schema is compiled from the router.yang used in the examples delivered
+# with Cisco NSO.
 
-import asyncio, crypt, sys
+import asyncio
 import json
+import os
+import sys
 import time
-from typing import Optional
-import traceback
 
-from netconf_merge import merge_tree, MergeError
 import asyncssh
+import lxml.etree as etree
+
+cdir = os.path.dirname(sys.argv[0])
+if cdir != '.':
+    os.chdir(cdir)
+sys.path.append(os.path.dirname(os.getcwd()))
 
 import async_netconf.base as base
 import async_netconf.server as server
 import async_netconf.util as util
-import lxml.etree as etree
-
 from async_netconf import nsmap_add, NSMAP, MAXSSHBUF
+from netconf_merge import merge_tree, MergeError
 
-"""
-TODO:
- - Consolidate handle_client into NetconfSSHServer or NetconfSession
- - Fix locking
- - Cleanup keep_running
- - Use argParse
-"""
 
 passwords = {'guest': 'guest',          # guest account with no password
              'admin': 'admin'   # password of 'secretpw'
@@ -76,15 +75,6 @@ class SystemServer(object):
     def rpc_get(self, session, rpc, filter_or_none):  # pylint: disable=W0613
         """Passed the filter element or None if not present"""
         data = util.elm("nc:data")
-
-        #
-        # Config Data
-        #
-
-
-        #
-        # State Data
-        #
         sysd = util.subelm(data, "sys:system-state")
 
         # System Identification
@@ -111,26 +101,17 @@ class SystemServer(object):
     def rpc_get_config(self, session, rpc, source_elm, filter_or_none):  # pylint: disable=W0613
         """Passed the source element"""
         data = util.elm("nc:data")
-        #
-        # Config Data
-        #
         data.append(self.cdb)
         return data
         #TODO: Fix filtering
         #return util.filter_results(rpc, data, filter_or_none)
 
     def rpc_edit_config(self, session, rpc, source_elm, filter_or_none):  # pylint: disable=W0613
-        print("rpc", etree.tostring(rpc, pretty_print=True).decode('utf-8'))
-        #print("source_elm", etree.tostring(source_elm, pretty_print=True).decode('utf-8'))
-        #print("filter", etree.tostring(filter_or_none, pretty_print=True).decode('utf-8'))
+        print(etree.tostring(rpc, pretty_print=True).decode('utf-8'))
         ec = rpc.find('edit-config', rpc.nsmap)
         config = ec.find('config', rpc.nsmap)
         sys = config.find('{http://example.com/router}sys')
-        try:
-            merge_tree(self.cdb, sys, self.schema)
-        except Exception as e:
-          print("An exception occured", e)
-          raise e
+        merge_tree(self.cdb, sys, self.schema)
         return etree.Element("ok")
 
     def rpc_system_restart(self, session, rpc, *params):

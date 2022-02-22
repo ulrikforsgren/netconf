@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- mode: python; python-indent: 4 -*-
 
-# To run this program, the file ``ssh_host_key`` must exist with an SSH
-# private key in it to use as a server host key. An SSH host certificate
-# can optionally be provided in the file ``ssh_host_key-cert.pub``.
+# This is an async example starting 10000 instances of async_router in
+# 10 separate processes with 1000 each.
+
 
 from multiprocessing import Process
 import async_router

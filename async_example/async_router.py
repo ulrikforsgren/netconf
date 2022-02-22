@@ -1,31 +1,27 @@
 #!/usr/bin/env python3
 # -*- mode: python; python-indent: 4 -*-
 
-# To run this program, the file ``ssh_host_key`` must exist with an SSH
-# private key in it to use as a server host key. An SSH host certificate
-# can optionally be provided in the file ``ssh_host_key-cert.pub``.
+# This is an async example derived from the system_server.
 
-import asyncio, crypt, sys
-import traceback
-from typing import Optional
+
+import asyncio
+import os
+import sys
 import time
 
 import asyncssh
+import lxml.etree as etree
+
+cdir = os.path.dirname(sys.argv[0])
+if cdir != '.':
+    os.chdir(cdir)
+sys.path.append(os.path.dirname(os.getcwd()))
 
 import async_netconf.base as base
 import async_netconf.server as server
 import async_netconf.util as util
-import lxml.etree as etree
-
 from async_netconf import nsmap_add, NSMAP, MAXSSHBUF
 
-"""
-TODO:
- - Consolidate handle_client into NetconfSSHServer or NetconfSession
- - Fix locking
- - Cleanup keep_running
- - Use argParse
-"""
 
 passwords = {'guest': 'guest',          # guest account with no password
              'admin': 'admin'   # password of 'secretpw'
@@ -107,10 +103,6 @@ class SystemServer(object):
     def rpc_get_config(self, session, rpc, source_elm, filter_or_none):  # pylint: disable=W0613
         """Passed the source element"""
         data = util.elm("nc:data")
-        #
-        # Config Data
-        #
-        #self._add_config(data)
         router = etree.parse('router.xml')
         data.append(router.getroot())
         return data
@@ -118,9 +110,6 @@ class SystemServer(object):
         return util.filter_results(rpc, data, filter_or_none)
 
     def rpc_edit_config(self, session, rpc, source_elm, filter_or_none):  # pylint: disable=W0613
-        #print("rpc", etree.tostring(rpc, pretty_print=True).decode('utf-8'))
-        #print("source_elm", etree.tostring(source_elm, pretty_print=True).decode('utf-8'))
-        #print("filter", etree.tostring(filter_or_none, pretty_print=True).decode('utf-8'))
         return etree.Element("ok")
 
     def rpc_system_restart(self, session, rpc, *params):
