@@ -143,7 +143,7 @@ async def start_servers(n, start_port) -> None:
     print("Servers started!")
     print(f"Listening on {n} ports: {start_port}-{start_port+n-1}")
     print(f"Startup in {elapsed} seconds.")
-    print("\n\n\n")
+    print()
     try:
         while True:
             await asyncio.sleep(60)
