@@ -1,0 +1,12 @@
+
+<ncs-config xmlns="http://tail-f.com/yang/tailf-ncs-config">
+
+  <notifications>
+    <event-streams>
+      <stream operation="delete">
+        <name>ncs-events</name>
+      </stream>
+    </event-streams>
+  </notifications>
+
+</ncs-config>

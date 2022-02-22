@@ -1,0 +1,14 @@
+
+<ncs-config xmlns="http://tail-f.com/yang/tailf-ncs-config">
+
+  <notifications>
+    <event-streams>
+      <stream operation="replace">
+        <name>ncs-events</name>
+        <description>Replaced stream!</description>
+        <replay-support>false</replay-support>
+      </stream>
+    </event-streams>
+  </notifications>
+
+</ncs-config>

@@ -9,17 +9,21 @@ from  lxml import etree as ET
 """
 Operations:
  - merge (default)
- - add
+ - create
  - replace
  - delete
+ - remove
+
+TODO:
+ - Start with schema from root...
 """
 
 # TODO:
 # - Refactor code: Look over structure and simplify if possible.
-# - Add rules to control where to add e.g. before, after, ...
+# - Add rules to control where to create e.g. before, after, ...
 # - Preserve empty lines and adjust fix indentation...
-# - Fix missing newlines for comments before root element.
 # - Handle xmlns prefix on operation
+# - Check key presence on lnode 
 
 class MergeError(Exception):
     pass
@@ -56,36 +60,61 @@ def name_in_keyleafs(k, kl):
     for ns, l in kl:
         if k == l: return True
     return False
-        
+
+def find_no_ns(c, tag):
+    for e in c:
+        if tag == no_ns(e.tag):
+            return e
+
+def find_all_no_ns(c, tag):
+    elems = []        
+    for e in c:
+        if tag == no_ns(e.tag):
+            elems.append(e)
+    return elems
+
 def merge_tree(lnode, rnode, schema):
     for c in rnode:
         rtag = no_ns(c.tag)
+        rtype, *rrest = schema[rtag]
         # Schema validation
         if rtag not in schema.keys():
-            print(f"ERROR: Tag {rtag} not found in schema:")
-            sys.exit(1)
+            raise MergeError(f"ERROR: Tag {rtag} not found in schema.")
         operation = 'merge' # default
         if 'operation' in c.attrib:
             operation = c.attrib.get('operation')
             del c.attrib['operation']
 
-        # TODO: Use schema
         keyname = key = None 
-        if 'key' in c.attrib:
-            keyname = c.attrib.get('key')
+        if rtype == 'list': 
+            # TODO: Support for multiple leafs in key
+            keyname = rrest[1][0][1]
             if keyname:
-                v = c.find(keyname)
-                if v is not None:
-                    key = v.text.strip()
-            del c.attrib['key'], v
-            if no_subelements(c):
-                if operation == 'add':
-                    raise MergeError('Attribute key can not be used with '
-                                     'operation add.')
-                else:
-                    raise MergeError('Attribute key can not be used with '
-                                     'text only elements.')
+                # TODO: Handle namespaces...
+                for z in c:
+                    if keyname == no_ns(z.tag):
+                        key = z.text.strip()
+                if not key:
+                    raise MergeError(f'List key leaf "{keyname}" not found.')
+
+        ## TODO: Use schema
+        #if 'key' in c.attrib:
+        #    keyname = c.attrib.get('key')
+        #    if keyname:
+        #        v = c.find(keyname)
+        #        if v is not None:
+        #            key = v.text.strip()
+        #    del c.attrib['key'], v
+        #    if no_subelements(c):
+        #        if operation == 'create':
+        #            raise MergeError('Attribute key can not be used with '
+        #                             'operation create.')
+        #        else:
+        #            raise MergeError('Attribute key can not be used with '
+        #                             'text only elements.')
+
         if keyname is not None:
+            assert rtype == 'list'
             t,tc,kl = schema[rtag]
             if not name_in_keyleafs(keyname, kl):
                 print(f"ERROR: Key leaf {keyname} not in schema.")
@@ -95,13 +124,17 @@ def merge_tree(lnode, rnode, schema):
 
         lcs = lnode.findall(c.tag)
 
-        if operation == 'add':
-            if keyname is not None:
-                raise MergeError('Attribute key can not be used with operation '
-                                 'add')
+        if operation == 'create':
             if not lcs:
                 lnode.append(c)
             else:
+                for zc in lcs:
+                    for zl in zc:
+                        if keyname == no_ns(zl.tag):
+                            if key == zl.text.strip():
+                                raise MergeError(f'Element {no_ns(zc.tag)} '
+                                                 f'with {keyname}={key} '
+                                                 f'already exists.')
                 lc = lcs.pop() # Last element
                 lnode.insert(lnode.index(lc)+1, c)
 
@@ -135,14 +168,16 @@ def merge_tree(lnode, rnode, schema):
                     if keyname is not None:
                         found = False
                         for lc in lcs:
-                            if keyname == '*':
-                                x1merge_tree(lc, deepcopy(c), schema)
+                            ltag = no_ns(lc.tag)
+                            # Schema validation
+                            if ltag not in schema.keys():
+                                print(f"ERROR: Tag {ltag} not found in schema:")
+                                sys.exit(1)
+                            k = find_no_ns(lc, keyname)
+                            if k is not None and k.text.strip() == key:
                                 found = True
-                            else:
-                                k = lc.find(keyname)
-                                if k is not None and k.text.strip() == key:
-                                    found = True
-                                    x2merge_tree(lc, deepcopy(c), schema)
+                                cschema = schema[ltag]
+                                merge_tree(lc, deepcopy(c), cschema[1])
                         if not found:
                             lnode.insert(lnode.index(lc)+1, deepcopy(c))
                             del found
@@ -164,14 +199,15 @@ def merge_tree(lnode, rnode, schema):
                     if keyname is not None:
                         found = False
                         for lc in lcs:
-                            if keyname == '*':
-                                lnode.replace(lc, deepcopy(c))
+                            ltag = no_ns(lc.tag)
+                            # Schema validation
+                            if ltag not in schema.keys():
+                                print(f"ERROR: Tag {ltag} not found in schema:")
+                                sys.exit(1)
+                            k = find_no_ns(lc, keyname)
+                            if k is not None and k.text.strip() == key:
                                 found = True
-                            else:
-                                k = lc.find(keyname)
-                                if k is not None and k.text.strip() == key:
-                                    found = True
-                                    lnode.replace(lc, deepcopy(c))
+                                lnode.replace(lc, deepcopy(c))
                         if not found:
                             lnode.insert(lnode.index(lc)+1, deepcopy(c))
                             del found
@@ -179,21 +215,26 @@ def merge_tree(lnode, rnode, schema):
                         for lc in lcs:
                             x4merge_tree(lc, deepcopy(c), schema)
 
-            elif operation == 'delete':
+            elif operation in ['delete', 'remove']:
                 if no_subelements(c):
                     for lc in lcs:
                         if c.text is None or c.text.strip() == lc.text.strip():
                             lnode.remove(lc)
                 else:
-                    if keyname is None:
-                        raise MergeError('No key specified for operation delete.')
+                    #if keyname is None:
+                    #    raise MergeError('No key specified for operation delete.')
+                    deleted = False
                     for lc in lcs:
-                        if keyname == '*':
+                        k = find_no_ns(lc, keyname)
+                        if k is not None and k.text.strip() == key:
                             lnode.remove(lc)
-                        else:
-                            k = lc.find(keyname)
-                            if k is not None and k.text.strip() == key:
-                                lnode.remove(lc)
+                            deleted = True
+                    if operation == 'delete' and not deleted:
+                            raise MergeError(f'Element {no_ns(lc.tag)} '
+                                             f'with {keyname}={key} '
+                                             f'does not exists.')
+                    del deleted
+    
 
 def main(files, schema, unit_test=False):
     ltree = None
@@ -217,10 +258,10 @@ def main(files, schema, unit_test=False):
 
 
 if __name__ == "__main__":
-    schema = json.loads(open(sys.argv[1]).read())
-    tree = schema['tree']['tailf-ncs-config:ncs-config'][1] # container sub elems
-    typedefs = schema['typedefs']
-
-    status, xml = main(sys.argv[2:], tree, True)
+    schema_file = json.loads(open(sys.argv[1]).read())
+    tree = schema_file['tree']
+    rootkey = list(tree.keys())[0]
+    schema = tree[rootkey][1]
+    status, xml = main(sys.argv[2:], schema, True)
     print(xml)
     sys.exit(status)
