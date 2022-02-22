@@ -67,7 +67,7 @@ def find_no_ns(c, tag):
             return e
 
 def find_all_no_ns(c, tag):
-    elems = []        
+    elems = []
     for e in c:
         if tag == no_ns(e.tag):
             elems.append(e)
@@ -80,10 +80,14 @@ def merge_tree(lnode, rnode, schema):
         # Schema validation
         if rtag not in schema.keys():
             raise MergeError(f"ERROR: Tag {rtag} not found in schema.")
+
         operation = 'merge' # default
         if 'operation' in c.attrib:
             operation = c.attrib.get('operation')
             del c.attrib['operation']
+        elif '{urn:ietf:params:xml:ns:netconf:base:1.0}operation' in c.attrib:
+            operation = c.attrib.get('{urn:ietf:params:xml:ns:netconf:base:1.0}operation')
+            del c.attrib['{urn:ietf:params:xml:ns:netconf:base:1.0}operation']
 
         keyname = key = None 
         if rtype == 'list': 
