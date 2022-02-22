@@ -1,0 +1,16 @@
+
+<ncs-config xmlns="http://tail-f.com/yang/tailf-ncs-config">
+
+  <notifications>
+    <event-streams>
+      <stream operation="merge">
+        <name>ncs-events</name>
+        <builtin-replay-store>
+          <max-size>100M</max-size>
+          <max-files>100</max-files>
+        </builtin-replay-store>
+      </stream>
+    </event-streams>
+  </notifications>
+
+</ncs-config>
