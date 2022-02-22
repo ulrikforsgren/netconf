@@ -598,12 +598,12 @@ class NetconfSSHServer:
         """Try to obtain target lock.
         Return 0 on success or the session ID of the lock holder.
         """
-        with self.lock:
-            with self.session_locks_lock:
-                if self.session_locks[target]:
-                    return self.session_locks[target]
-                self.session_locks[target] = session.session_id
-                return 0
+        #with self.lock:
+        #    with self.session_locks_lock:
+        if self.session_locks[target]:
+            return self.session_locks[target]
+        self.session_locks[target] = session.session_id
+        return 0
 
     def is_target_locked(self, target):
         """Returns the sesions ID who owns the lock or 0 if not locked."""
