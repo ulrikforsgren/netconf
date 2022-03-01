@@ -5,6 +5,7 @@
 
 
 import asyncio
+import logging
 import os
 import sys
 import time
@@ -120,11 +121,12 @@ class SystemServer(object):
 
 
 async def start_servers(n, start_port) -> None:
+    logging.basicConfig(level=logging.DEBUG)
     servers = []
     start = time.monotonic()
 
     for port in range(0, n):
-        server = SystemServer(start_port+port, 'ssh_host_key')
+        server = SystemServer(start_port+port, 'ssh_host_key', debug=True)
         servers.append(server)
         await server.listen()
 
