@@ -59,7 +59,7 @@ else:
         yield last, True
 
 
-def chunkit(msg, maxsend, minsend=0, pad="\n"):
+def chunkit(msg, maxsend, minsend=0, pad=b"\n"):
     """
     chunkit iterates over a msg returning chunks of at most maxsend
     size, and of at least minsend size if non-zero. Padding will be
