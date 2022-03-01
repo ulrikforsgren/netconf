@@ -20,8 +20,8 @@ from __future__ import absolute_import, division, unicode_literals, print_functi
 import copy
 import logging
 from lxml import etree
-from netconf import NSMAP, qmap
-from netconf import error
+from async_netconf import NSMAP, qmap
+from async_netconf import error
 
 # Tries to somewhat implement RFC6241 filtering
 logger = logging.getLogger(__name__)
