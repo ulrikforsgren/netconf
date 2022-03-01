@@ -13,7 +13,7 @@ import time
 import asyncssh
 import lxml.etree as etree
 
-cdir = os.path.dirname(sys.argv[0])
+cdir = os.path.dirname(sys.argv[0]) or '.'
 if cdir != '.':
     os.chdir(cdir)
 sys.path.append(os.path.dirname(os.getcwd()))
