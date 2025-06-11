@@ -27,7 +27,7 @@ from lxml import etree
 import asyncssh
 
 from async_netconf import base
-import async_netconf.error as ncerror
+import netconf.error as ncerror
 from async_netconf import NSMAP
 from async_netconf import qmap
 from async_netconf import util
