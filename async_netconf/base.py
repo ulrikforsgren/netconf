@@ -28,7 +28,7 @@ import asyncssh
 from lxml import etree
 
 from async_netconf import NSMAP, MAXSSHBUF
-from async_netconf.error import ChannelClosed, FramingError, SessionError
+from netconf.error import ChannelClosed, FramingError, SessionError
 import async_netconf.util as ncutil
 
 logger = logging.getLogger(__name__)

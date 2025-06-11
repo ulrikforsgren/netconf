@@ -22,6 +22,7 @@ import logging
 import io
 import threading
 import socket
+from urllib.parse import urlparse, ParseResult
 
 from lxml import etree
 from monotonic import monotonic
@@ -171,7 +172,7 @@ class NetconfClientSession(NetconfSession):
         # ok = reply.xpath("nc:ok", namespaces=self.nsmap)
         return tree, reply, msg
 
-    def send_rpc_async(self, rpc, noreply=False):
+    def send_rpc_async(self, rpc, noreply=False, tracecontext=None):
         """Send a generic RPC to the server and await the reply.
 
         :param rpc: The XML of the netconf RPC, not including the <nc:rpc> tag.
@@ -195,10 +196,16 @@ class NetconfClientSession(NetconfSession):
         if self.debug:
             logger.debug("%s: Sending RPC message-id: %s", str(self), str(msg_id))
 
+        if tracecontext is not None:
+            traceparent = (" xmlns:w3ctc=\"urn:ietf:params:xml:ns:netconf:w3ctc:1.0\""
+                         " w3ctc:traceparent=\"" + tracecontext + "\"")
+        else:
+            traceparent = ""
+
         def sendit():
-            self.send_message(
-                """<nc:rpc nc:message-id="{}" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">{}</nc:rpc>"""
-                .format(msg_id, rpc))
+            msg = ("""<nc:rpc nc:message-id="{}" xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"{}>{}</nc:rpc>"""
+                .format(msg_id, traceparent, rpc))
+            self.send_message(msg)
 
         if noreply:
             sendit()
@@ -222,7 +229,7 @@ class NetconfClientSession(NetconfSession):
         msg_id = self.send_rpc_async(rpc)
         return self.wait_reply(msg_id, timeout)
 
-    def edit_config_async(self, target, method, newconf, testopt, erroropt):
+    def edit_config_async(self, target, method, newconf, testopt, erroropt, tracecontext=None):
         """Operate on config in ~target~ using ~newconf~ according to ~method~ ("merge", "replace",
         "none"). If "none" then no nodes are modified until a element specifies the mode as an
         attribute.
@@ -255,7 +262,7 @@ class NetconfClientSession(NetconfSession):
             rpc += "  <nc:error-option>{}</nc:error-option>\n".format(erroropt)
         rpc += newconf
         rpc += "</nc:edit-config>\n"
-        return self.send_rpc_async(rpc)
+        return self.send_rpc_async(rpc, tracecontext=tracecontext)
 
     def edit_config(self,
                     target="running",
@@ -263,7 +270,8 @@ class NetconfClientSession(NetconfSession):
                     newconf="",
                     testopt="",
                     erroropt="",
-                    timeout=None):
+                    timeout=None,
+                    tracecontext=None):
         """Operate on config in ~target~ using ~newconf~ according to ~method~ ("merge", "replace" or
         "none"). If "none" then no nodes are modified until a element specifies the mode as an
         attribute.
@@ -280,11 +288,11 @@ class NetconfClientSession(NetconfSession):
         :rtype: lxml.Element
         :raises: ReplyTimeoutError, RPCError, SessionError
         """
-        msg_id = self.edit_config_async(target, method, newconf, testopt, erroropt)
+        msg_id = self.edit_config_async(target, method, newconf, testopt, erroropt, tracecontext=tracecontext)
         _, reply, _ = self.wait_reply(msg_id, timeout)
         return reply
 
-    def get_config_async(self, source, select):
+    def get_config_async(self, source, select, tracecontext=None):
         """Get config asynchronously for a given source from the server. If `select` is
         specified it is either an XPATH expression or XML subtree filter for
         selecting a subsection of the config.
@@ -299,9 +307,9 @@ class NetconfClientSession(NetconfSession):
             source = util.elm(source if ":" in source or source.startswith("{") else "nc:" + source)
         util.subelm(util.subelm(getelm, "nc:source"), source)
         _get_selection(getelm, select)
-        return self.send_rpc_async(getelm)
+        return self.send_rpc_async(getelm, tracecontext=tracecontext)
 
-    def get_config(self, source="running", select=None, timeout=None):
+    def get_config(self, source="running", select=None, timeout=None, tracecontext=None):
         """Get config for a given source from the server. If `select` is specified it
         is either an XPATH expression or XML subtree filter for selecting a
         subsection of the config. If `timeout` is not `None` it specifies how
@@ -315,11 +323,11 @@ class NetconfClientSession(NetconfSession):
         :rtype: lxml.Element
         :raises: ReplyTimeoutError, RPCError, SessionError
         """
-        msg_id = self.get_config_async(source, select)
+        msg_id = self.get_config_async(source, select, tracecontext=tracecontext)
         _, reply, _ = self.wait_reply(msg_id, timeout)
         return reply.find("nc:data", namespaces=NSMAP)
 
-    def get_async(self, select):
+    def get_async(self, select, tracecontext=None):
         """Get operational state asynchronously from the server. If `select` is
         specified it is either an XPATH expression or XML subtree filter for
         selecting a subsection of the state. If `timeout` is not `None` it
@@ -332,9 +340,9 @@ class NetconfClientSession(NetconfSession):
 
         getelm = util.elm("nc:get")
         _get_selection(getelm, select)
-        return self.send_rpc_async(getelm)
+        return self.send_rpc_async(getelm, tracecontext=tracecontext)
 
-    def get(self, select=None, timeout=None):
+    def get(self, select=None, timeout=None, tracecontext=None):
         """Get operational state from the server. If `select` is specified it is either
         an XPATH expression or XML subtree filter for selecting a subsection of
         the state. If `timeout` is not `None` it specifies how long to wait for
@@ -347,11 +355,11 @@ class NetconfClientSession(NetconfSession):
         :rtype: lxml.Element
         :raises: ReplyTimeoutError, RPCError, SessionError
         """
-        msg_id = self.get_async(select)
+        msg_id = self.get_async(select, tracecontext=tracecontext)
         _, reply, _ = self.wait_reply(msg_id, timeout)
         return reply.find("nc:data", namespaces=NSMAP)
 
-    def lock_async(self, target):
+    def lock_async(self, target, tracecontext=None):
         """Lock target datastore asynchronously.
 
         :param target: A string specifying the config datastore to lock.
@@ -362,9 +370,9 @@ class NetconfClientSession(NetconfSession):
         if not hasattr(target, "nsmap"):
             target = util.elm(target if ":" in target or target.startswith("{") else "nc:" + target)
         util.subelm(util.subelm(lockelm, "nc:target"), target)
-        return self.send_rpc_async(lockelm)
+        return self.send_rpc_async(lockelm, tracecontext=tracecontext)
 
-    def lock(self, target="running", timeout=None):
+    def lock(self, target="running", timeout=None, tracecontext=None):
         """Lock target datastore asynchronously.
 
         If `timeout` is not `None` it specifies how long to wait for the get operation to complete.
@@ -373,11 +381,11 @@ class NetconfClientSession(NetconfSession):
         :return: None
         :raises: RPCError, SessionError
         """
-        msg_id = self.lock_async(target)
+        msg_id = self.lock_async(target, tracecontext=tracecontext)
         _, reply, _ = self.wait_reply(msg_id, timeout)
         return reply.find("nc:data", namespaces=NSMAP)
 
-    def unlock_async(self, target):
+    def unlock_async(self, target, tracecontext=None):
         """Unlock target datastore asynchronously.
 
         :param target: A string specifying the config datastore to unlock.
@@ -388,9 +396,9 @@ class NetconfClientSession(NetconfSession):
         if not hasattr(target, "nsmap"):
             target = util.elm(target if ":" in target or target.startswith("{") else "nc:" + target)
         util.subelm(util.subelm(unlockelm, "nc:target"), target)
-        return self.send_rpc_async(unlockelm)
+        return self.send_rpc_async(unlockelm, tracecontext=tracecontext)
 
-    def unlock(self, target="running", timeout=None):
+    def unlock(self, target="running", timeout=None, tracecontext=None):
         """Unlock target datastore asynchronously.
 
         If `timeout` is not `None` it specifies how long to wait for the get operation to complete.
@@ -399,9 +407,93 @@ class NetconfClientSession(NetconfSession):
         :return: None
         :raises: RPCError, SessionError
         """
-        msg_id = self.unlock_async(target)
+        msg_id = self.unlock_async(target, tracecontext=tracecontext)
         _, reply, _ = self.wait_reply(msg_id, timeout)
         return reply.find("nc:data", namespaces=NSMAP)
+
+    def delete_config_async(self, target, tracecontext=None):
+        """Delete a configuration datastore asynchronously.
+
+        :param target: The name of the configuration datastore to delete.
+        :return: The RPC message id which can be passed to wait_reply for the results.
+        :raises: SessionError
+        """
+        if hasattr(target, "nsmap"):
+            target = target.tag
+        elif ":" not in target:
+            target = "nc:" + target
+
+        rpc = """
+<nc:delete-config>
+  <nc:target>
+    <{} />
+  </nc:target>
+</nc:delete-config>""".format(target)
+        return self.send_rpc_async(rpc, tracecontext=tracecontext)
+
+    def delete_config(self, target, timeout=None, tracecontext=None):
+        """Delete a configuration datastore.
+
+        :param target: The name of the configuration datastore to delete.
+        :param timeout: A value in fractional seconds to wait for the operation to complete or
+                       `None` for no timeout.
+        :return: The result of the delete operation
+        :rtype: lxml.Element
+        :raises: ReplyTimeoutError, RPCError, SessionError
+        """
+        msg_id = self.delete_config_async(target, tracecontext=tracecontext)
+        _, reply, _ = self.wait_reply(msg_id, timeout)
+        return reply
+        
+    def copy_config_async(self, source, target, tracecontext=None):
+        """Copy a configuration datastore to another asynchronously.
+
+        :param source: The name of the source configuration datastore or URL.
+        :param target: The name of the target configuration datastore or URL.
+        :return: The RPC message id which can be passed to wait_reply for the results.
+        :raises: SessionError
+        """
+        def format_ds(ds):
+            if hasattr(ds, "nsmap"):
+                return f'<{ds.tag} />'
+            elif isinstance(ds, str):
+                parsed_url = urlparse(ds)
+                if not parsed_url.scheme:
+                    parsed_url = parsed_url._replace(scheme='nc')
+                    return f'<{parsed_url.geturl()} />'
+                return f'<nc:url>{parsed_url.geturl()}</nc:url>'
+            elif isinstance(ds, ParseResult):
+                return f'<nc:url>{ds.geturl()}</nc:url>'
+            return None
+        
+        source = format_ds(source)
+        target = format_ds(target)
+
+        rpc = """
+<nc:copy-config>
+  <nc:target>
+    {target}
+  </nc:target>
+  <nc:source>
+    {source}
+  </nc:source>
+</nc:copy-config>""".format(source=source, target=target)
+        return self.send_rpc_async(rpc, tracecontext=tracecontext)
+
+    def copy_config(self, source, target, timeout=None, tracecontext=None):
+        """Copy a configuration datastore to another.
+
+        :param source: The name of the source configuration datastore or URL.
+        :param target: The name of the target configuration datastore or URL.
+        :param timeout: A value in fractional seconds to wait for the operation to complete or
+                       `None` for no timeout.
+        :return: The result of the copy operation
+        :rtype: lxml.Element
+        :raises: ReplyTimeoutError, RPCError, SessionError
+        """
+        msg_id = self.copy_config_async(source, target, tracecontext=tracecontext)
+        _, reply, _ = self.wait_reply(msg_id, timeout)
+        return reply
 
     # ----------------
     # Internal Methods

@@ -21,7 +21,7 @@ import copy
 import logging
 from lxml import etree
 from async_netconf import NSMAP, qmap
-from async_netconf import error
+from netconf import error
 
 # Tries to somewhat implement RFC6241 filtering
 logger = logging.getLogger(__name__)
