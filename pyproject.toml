@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "netconf"
-version = "0.0.1"  # Will be read from git tags by setuptools_scm
+version = "2.2.0"  # Will be read from git tags by setuptools_scm
 description = "NETCONF client and server implementations with both synchronous and asynchronous interfaces"
 readme = "README.rst"
 authors = [
