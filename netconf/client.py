@@ -218,7 +218,7 @@ class NetconfClientSession(NetconfSession):
 
         return msg_id
 
-    def send_rpc(self, rpc, timeout=None):
+    def send_rpc(self, rpc, timeout=None, tracecontext=None):
         """Send a generic RPC to the server and await the reply.
 
         :param rpc (string): The XML of the netconf RPC, not including the <rpc> tag.
@@ -226,7 +226,7 @@ class NetconfClientSession(NetconfSession):
         :rtype: (lxml.etree, lxml.Element, lxml.Element)
         :raises: RPCError, SessionError
         """
-        msg_id = self.send_rpc_async(rpc)
+        msg_id = self.send_rpc_async(rpc, tracecontext=tracecontext)
         return self.wait_reply(msg_id, timeout)
 
     def edit_config_async(self, target, method, newconf, testopt, erroropt, tracecontext=None):
